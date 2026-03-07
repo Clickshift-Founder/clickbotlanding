@@ -1,0 +1,1927 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ClickBot — The Web3 Siri for Solana Traders</title>
+<meta name="description" content="AI-powered Solana trading assistant. Analyze, snipe, copy trade, and cash out to your bank. All from Telegram.">
+<meta property="og:title" content="ClickBot — Web3 Siri for Solana">
+<meta property="og:description" content="Trade smarter. Cash out faster. No exchange required.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=IBM+Plex+Mono:wght@300;400;500;600&family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+/* ── RESET & BASE ─────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:         #060608;
+  --bg2:        #0D0D10;
+  --bg3:        #121218;
+  --border:     rgba(255,255,255,0.07);
+  --green:      #00FF88;
+  --green-dim:  #00C96A;
+  --cyan:       #00D4FF;
+  --gold:       #FFD166;
+  --red:        #FF4D6A;
+  --text:       #E8E8EC;
+  --text-dim:   #888899;
+  --text-faint: #444455;
+  --card:       rgba(255,255,255,0.03);
+  --glow-green: 0 0 40px rgba(0,255,136,0.15);
+  --glow-cyan:  0 0 40px rgba(0,212,255,0.15);
+  --font-display: 'Playfair Display', serif;
+  --font-mono:    'IBM Plex Mono', monospace;
+  --font-body:    'Sora', sans-serif;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  overflow-x: hidden;
+  cursor: default;
+}
+
+/* ── NOISE OVERLAY ────────────────────────────────────────── */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none; z-index: 1000; opacity: 0.4;
+}
+
+/* ── SCROLLBAR ────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--green-dim); border-radius: 2px; }
+
+/* ── NAVIGATION ───────────────────────────────────────────── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 900;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 20px 48px;
+  background: rgba(6,6,8,0.7);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  transition: padding 0.3s ease;
+}
+nav.scrolled { padding: 14px 48px; }
+
+.nav-logo {
+  display: flex; align-items: center; gap: 10px;
+  text-decoration: none;
+}
+.nav-logo-mark {
+  width: 32px; height: 32px;
+  background: var(--green);
+  border-radius: 8px;
+  display: grid; place-items: center;
+  font-family: var(--font-mono);
+  font-weight: 600; font-size: 14px;
+  color: #000;
+}
+.nav-logo-text {
+  font-family: var(--font-mono);
+  font-size: 15px; font-weight: 500;
+  color: var(--text); letter-spacing: 0.02em;
+}
+.nav-logo-text span { color: var(--green); }
+
+.nav-links {
+  display: flex; align-items: center; gap: 32px;
+  list-style: none;
+}
+.nav-links a {
+  font-size: 13px; font-weight: 400;
+  color: var(--text-dim); text-decoration: none;
+  font-family: var(--font-mono);
+  transition: color 0.2s;
+  letter-spacing: 0.02em;
+}
+.nav-links a:hover { color: var(--green); }
+
+.nav-cta {
+  background: var(--green);
+  color: #000 !important;
+  padding: 9px 20px;
+  border-radius: 6px;
+  font-weight: 600 !important;
+  font-size: 12px !important;
+  letter-spacing: 0.04em !important;
+  transition: all 0.2s !important;
+}
+.nav-cta:hover {
+  background: #fff !important;
+  color: #000 !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 20px rgba(0,255,136,0.3) !important;
+}
+
+/* ── HERO ─────────────────────────────────────────────────── */
+#hero {
+  min-height: 100vh;
+  display: flex; align-items: center;
+  position: relative; overflow: hidden;
+  padding: 120px 48px 80px;
+}
+
+.hero-grid-bg {
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(0,255,136,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,255,136,0.03) 1px, transparent 1px);
+  background-size: 60px 60px;
+  mask-image: radial-gradient(ellipse 80% 60% at 50% 50%, black, transparent);
+}
+
+.hero-orb-1 {
+  position: absolute; width: 600px; height: 600px;
+  background: radial-gradient(circle, rgba(0,255,136,0.08) 0%, transparent 70%);
+  top: -100px; left: -100px; pointer-events: none;
+  animation: orbFloat 8s ease-in-out infinite;
+}
+.hero-orb-2 {
+  position: absolute; width: 400px; height: 400px;
+  background: radial-gradient(circle, rgba(0,212,255,0.06) 0%, transparent 70%);
+  bottom: 0; right: 10%; pointer-events: none;
+  animation: orbFloat 10s ease-in-out infinite reverse;
+}
+@keyframes orbFloat {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(20px, -30px); }
+}
+
+.hero-inner {
+  position: relative; z-index: 10;
+  max-width: 1200px; margin: 0 auto;
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 80px; align-items: center; width: 100%;
+}
+
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: rgba(0,255,136,0.08);
+  border: 1px solid rgba(0,255,136,0.2);
+  border-radius: 100px;
+  padding: 6px 14px; margin-bottom: 28px;
+  font-family: var(--font-mono);
+  font-size: 11px; color: var(--green);
+  letter-spacing: 0.08em; text-transform: uppercase;
+}
+.hero-badge::before {
+  content: '';
+  width: 6px; height: 6px;
+  background: var(--green);
+  border-radius: 50%;
+  animation: pulse 2s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.8); }
+}
+
+.hero-headline {
+  font-family: var(--font-display);
+  font-size: clamp(42px, 5vw, 72px);
+  font-weight: 900;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  margin-bottom: 24px;
+}
+.hero-headline em {
+  font-style: italic;
+  color: var(--green);
+}
+
+.hero-sub {
+  font-size: 17px; line-height: 1.7;
+  color: var(--text-dim); max-width: 480px;
+  margin-bottom: 40px; font-weight: 300;
+}
+
+.hero-ctas {
+  display: flex; gap: 16px; flex-wrap: wrap;
+  margin-bottom: 56px;
+}
+
+.btn-primary {
+  display: inline-flex; align-items: center; gap: 10px;
+  background: var(--green); color: #000;
+  padding: 14px 28px; border-radius: 8px;
+  font-family: var(--font-mono); font-weight: 600;
+  font-size: 13px; letter-spacing: 0.04em;
+  text-decoration: none;
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 0 30px rgba(0,255,136,0.2);
+}
+.btn-primary:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 8px 40px rgba(0,255,136,0.35);
+  background: #fff;
+}
+.btn-primary .icon { font-size: 18px; }
+
+.btn-secondary {
+  display: inline-flex; align-items: center; gap: 10px;
+  background: transparent; color: var(--text);
+  padding: 14px 28px; border-radius: 8px;
+  font-family: var(--font-mono); font-weight: 500;
+  font-size: 13px; letter-spacing: 0.04em;
+  text-decoration: none;
+  border: 1px solid var(--border);
+  transition: all 0.25s;
+}
+.btn-secondary:hover {
+  border-color: var(--green);
+  color: var(--green);
+  transform: translateY(-2px);
+}
+
+.hero-stats {
+  display: flex; gap: 40px;
+}
+.hero-stat { }
+.hero-stat-num {
+  font-family: var(--font-mono);
+  font-size: 28px; font-weight: 600;
+  color: var(--text);
+  display: flex; align-items: baseline; gap: 4px;
+}
+.hero-stat-num span { font-size: 14px; color: var(--green); }
+.hero-stat-label {
+  font-size: 11px; color: var(--text-faint);
+  font-family: var(--font-mono); letter-spacing: 0.06em;
+  text-transform: uppercase; margin-top: 4px;
+}
+
+/* ── PHONE MOCKUP ─────────────────────────────────────────── */
+.hero-phone-wrap {
+  display: flex; justify-content: center; align-items: center;
+  position: relative;
+}
+
+.phone-mockup {
+  width: 260px;
+  background: #111115;
+  border-radius: 40px;
+  border: 1.5px solid rgba(255,255,255,0.12);
+  box-shadow:
+    0 0 0 8px rgba(255,255,255,0.03),
+    0 40px 80px rgba(0,0,0,0.8),
+    var(--glow-green);
+  overflow: hidden;
+  position: relative;
+  animation: phoneFloat 6s ease-in-out infinite;
+}
+@keyframes phoneFloat {
+  0%, 100% { transform: translateY(0) rotate(-2deg); }
+  50% { transform: translateY(-12px) rotate(-1deg); }
+}
+
+.phone-notch {
+  width: 90px; height: 24px;
+  background: #111115;
+  border-radius: 0 0 16px 16px;
+  margin: 0 auto;
+  position: relative; z-index: 10;
+  border: 1.5px solid rgba(255,255,255,0.08);
+  border-top: none;
+}
+
+.phone-screen {
+  background: #0D0D12;
+  min-height: 480px;
+  padding: 16px 12px 20px;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  overflow: hidden;
+}
+
+/* screens */
+.phone-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 16px;
+}
+.phone-header-title {
+  font-size: 11px; font-weight: 600;
+  color: var(--text);
+}
+.phone-balance-card {
+  background: linear-gradient(135deg, #0D2018, #091A10);
+  border: 1px solid rgba(0,255,136,0.15);
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 12px;
+  position: relative; overflow: hidden;
+}
+.phone-balance-card::before {
+  content: '';
+  position: absolute; top: -20px; right: -20px;
+  width: 80px; height: 80px;
+  background: radial-gradient(circle, rgba(0,255,136,0.1), transparent);
+}
+.phone-balance-label {
+  font-size: 8px; color: var(--text-faint);
+  letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 6px;
+}
+.phone-balance-amount {
+  font-size: 22px; font-weight: 600; color: var(--green);
+  margin-bottom: 4px;
+}
+.phone-balance-usd { font-size: 8px; color: var(--text-dim); }
+
+.phone-menu-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 8px; margin-top: 12px;
+}
+.phone-menu-btn {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 8px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.phone-menu-btn:hover {
+  border-color: var(--green);
+  background: rgba(0,255,136,0.06);
+}
+.phone-menu-btn .menu-icon { font-size: 16px; margin-bottom: 4px; }
+.phone-menu-btn .menu-label { font-size: 7.5px; color: var(--text-dim); }
+
+.phone-analysis {
+  background: rgba(0,255,136,0.05);
+  border: 1px solid rgba(0,255,136,0.2);
+  border-radius: 10px;
+  padding: 10px;
+  margin-top: 8px;
+}
+.analysis-token { font-size: 10px; font-weight: 600; color: var(--green); }
+.analysis-row {
+  display: flex; justify-content: space-between;
+  margin-top: 5px; font-size: 8px; color: var(--text-dim);
+}
+.analysis-row .val { color: var(--text); }
+.analysis-verdict {
+  margin-top: 8px; padding: 4px 8px;
+  background: rgba(0,255,136,0.15);
+  border-radius: 4px;
+  font-size: 8px; color: var(--green); font-weight: 600;
+  text-align: center; letter-spacing: 0.06em;
+}
+
+/* ── FLOATING ELEMENTS AROUND PHONE ──────────────────────── */
+.float-chip {
+  position: absolute;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 8px 14px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  white-space: nowrap;
+  backdrop-filter: blur(10px);
+}
+.float-chip.green { border-color: rgba(0,255,136,0.3); color: var(--green); }
+.float-chip.cyan  { border-color: rgba(0,212,255,0.3); color: var(--cyan); }
+.float-chip.gold  { border-color: rgba(255,209,102,0.3); color: var(--gold); }
+
+.chip-1 { top: 10%; left: -20%; animation: chipFloat 7s ease-in-out infinite; }
+.chip-2 { top: 35%; right: -25%; animation: chipFloat 9s ease-in-out infinite 1s; }
+.chip-3 { bottom: 20%; left: -15%; animation: chipFloat 8s ease-in-out infinite 2s; }
+.chip-4 { bottom: 35%; right: -20%; animation: chipFloat 6s ease-in-out infinite 0.5s; }
+@keyframes chipFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+/* ── TICKER STRIP ─────────────────────────────────────────── */
+.ticker-wrap {
+  background: var(--bg2);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  overflow: hidden; padding: 10px 0;
+}
+.ticker-track {
+  display: flex; gap: 0;
+  animation: ticker 30s linear infinite;
+  width: max-content;
+}
+.ticker-track:hover { animation-play-state: paused; }
+@keyframes ticker {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+.ticker-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 0 32px;
+  font-family: var(--font-mono); font-size: 11px;
+  border-right: 1px solid var(--border);
+  white-space: nowrap;
+}
+.ticker-symbol { color: var(--text); font-weight: 500; }
+.ticker-price { color: var(--text-dim); }
+.ticker-change.up { color: var(--green); }
+.ticker-change.down { color: var(--red); }
+
+/* ── SECTION BASE ─────────────────────────────────────────── */
+section { padding: 120px 48px; }
+.section-inner { max-width: 1200px; margin: 0 auto; }
+
+.section-label {
+  font-family: var(--font-mono); font-size: 10px;
+  color: var(--green); letter-spacing: 0.12em;
+  text-transform: uppercase; margin-bottom: 16px;
+  display: flex; align-items: center; gap: 12px;
+}
+.section-label::before {
+  content: '';
+  display: block; width: 24px; height: 1px;
+  background: var(--green);
+}
+
+.section-title {
+  font-family: var(--font-display);
+  font-size: clamp(32px, 4vw, 54px);
+  font-weight: 700; line-height: 1.1;
+  letter-spacing: -0.02em; margin-bottom: 20px;
+}
+.section-title em { font-style: italic; color: var(--green); }
+
+.section-body {
+  font-size: 16px; line-height: 1.8;
+  color: var(--text-dim); max-width: 560px;
+  font-weight: 300;
+}
+
+/* ── AGENT STREAM SECTION ─────────────────────────────────── */
+#agent-stream {
+  background: var(--bg2);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  padding: 100px 48px;
+  position: relative; overflow: hidden;
+}
+
+.stream-bg {
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 60% 40% at 50% 50%, rgba(0,255,136,0.04), transparent);
+}
+
+.stream-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 80px; align-items: center;
+  position: relative; z-index: 2;
+}
+
+.stream-terminal {
+  background: #0A0A0E;
+  border: 1px solid rgba(0,255,136,0.2);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: var(--glow-green), 0 40px 80px rgba(0,0,0,0.5);
+}
+
+.terminal-bar {
+  background: #111118;
+  padding: 12px 16px;
+  display: flex; align-items: center; gap: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.terminal-dot {
+  width: 10px; height: 10px; border-radius: 50%;
+}
+.terminal-dot.r { background: #FF5F57; }
+.terminal-dot.y { background: #FFBD2E; }
+.terminal-dot.g { background: #28CA41; }
+.terminal-title {
+  font-family: var(--font-mono); font-size: 10px;
+  color: var(--text-faint); margin-left: 8px;
+  letter-spacing: 0.04em;
+}
+
+.terminal-body {
+  padding: 20px;
+  min-height: 320px;
+  font-family: var(--font-mono);
+  font-size: 11px; line-height: 1.8;
+}
+
+.stream-line {
+  display: flex; gap: 10px; margin-bottom: 6px;
+  opacity: 0; transform: translateY(4px);
+  animation: lineIn 0.3s ease forwards;
+}
+@keyframes lineIn {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.stream-agent {
+  font-size: 10px; font-weight: 600;
+  white-space: nowrap; padding: 1px 6px;
+  border-radius: 3px;
+}
+.agent-analyzer  { background: rgba(0,255,136,0.12); color: var(--green); }
+.agent-sniper    { background: rgba(0,212,255,0.12); color: var(--cyan); }
+.agent-guardian  { background: rgba(255,209,102,0.12); color: var(--gold); }
+.agent-executor  { background: rgba(255,77,106,0.12); color: var(--red); }
+
+.stream-msg { color: var(--text-dim); }
+.stream-msg .highlight { color: var(--text); }
+.stream-msg .val-green { color: var(--green); }
+.stream-msg .val-red { color: var(--red); }
+.stream-msg .val-cyan { color: var(--cyan); }
+.stream-msg .val-gold { color: var(--gold); }
+
+.stream-cursor {
+  display: inline-block; width: 7px; height: 12px;
+  background: var(--green); margin-left: 2px;
+  vertical-align: middle;
+  animation: blink 1s step-end infinite;
+}
+@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+/* ── FEATURES SECTION ─────────────────────────────────────── */
+#features { background: var(--bg); }
+
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2px;
+  margin-top: 80px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.feature-card {
+  background: var(--card);
+  padding: 40px 32px;
+  border-right: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  transition: background 0.3s;
+  position: relative; overflow: hidden;
+}
+.feature-card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--green), transparent);
+  opacity: 0; transition: opacity 0.3s;
+}
+.feature-card:hover { background: rgba(0,255,136,0.03); }
+.feature-card:hover::before { opacity: 1; }
+.feature-card:nth-child(3n) { border-right: none; }
+.feature-card:nth-child(n+4) { border-bottom: none; }
+
+.feature-icon {
+  font-size: 32px; margin-bottom: 20px; display: block;
+}
+.feature-name {
+  font-family: var(--font-display);
+  font-size: 20px; font-weight: 700;
+  margin-bottom: 10px;
+  letter-spacing: -0.01em;
+}
+.feature-desc {
+  font-size: 13px; line-height: 1.7;
+  color: var(--text-dim); font-weight: 300;
+}
+.feature-tag {
+  display: inline-block; margin-top: 16px;
+  font-family: var(--font-mono); font-size: 9px;
+  color: var(--green); letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border-bottom: 1px solid rgba(0,255,136,0.3);
+  padding-bottom: 2px;
+}
+
+/* ── SCREENS SHOWCASE ─────────────────────────────────────── */
+#screens {
+  background: var(--bg2);
+  border-top: 1px solid var(--border);
+}
+
+.screens-header {
+  text-align: center; margin-bottom: 80px;
+}
+.screens-header .section-label {
+  justify-content: center;
+}
+.screens-header .section-label::before { display: none; }
+
+.screens-row {
+  display: flex;
+  gap: 32px;
+  justify-content: center;
+  align-items: flex-end;
+  flex-wrap: wrap;
+}
+
+.screen-item {
+  display: flex; flex-direction: column; align-items: center; gap: 20px;
+  flex: 0 0 auto;
+}
+.screen-label {
+  font-family: var(--font-mono); font-size: 10px;
+  color: var(--text-faint); letter-spacing: 0.06em;
+  text-transform: uppercase; text-align: center;
+}
+
+/* phone sizes */
+.phone-sm  { width: 200px; }
+.phone-md  { width: 230px; }
+.phone-lg  { width: 260px; transform: translateY(-20px); }
+
+.screen-phone {
+  background: #111115;
+  border-radius: 32px;
+  border: 1.5px solid rgba(255,255,255,0.1);
+  overflow: hidden;
+  box-shadow:
+    0 0 0 6px rgba(255,255,255,0.03),
+    0 30px 60px rgba(0,0,0,0.7);
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.4s;
+}
+.screen-phone:hover {
+  transform: translateY(-8px) scale(1.02) !important;
+  box-shadow:
+    0 0 0 6px rgba(255,255,255,0.05),
+    0 50px 80px rgba(0,0,0,0.8),
+    var(--glow-green);
+}
+
+.screen-notch {
+  width: 70px; height: 18px;
+  background: #111115;
+  border-radius: 0 0 12px 12px;
+  margin: 0 auto;
+  border: 1.5px solid rgba(255,255,255,0.06);
+  border-top: none;
+}
+
+.screen-body {
+  padding: 12px 10px 16px;
+  font-family: var(--font-mono);
+  background: #0D0D12;
+  min-height: 380px;
+}
+
+/* Screen: Main Menu */
+.s-header {
+  text-align: center; margin-bottom: 14px;
+}
+.s-welcome {
+  font-size: 8px; color: var(--text-faint); margin-bottom: 2px;
+}
+.s-title { font-size: 12px; font-weight: 600; color: var(--text); }
+
+.s-wallet-strip {
+  background: linear-gradient(135deg, #0D2018, #091015);
+  border: 1px solid rgba(0,255,136,0.15);
+  border-radius: 10px; padding: 10px;
+  margin-bottom: 12px;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.s-sol { font-size: 14px; font-weight: 600; color: var(--green); }
+.s-usd { font-size: 7px; color: var(--text-dim); margin-top: 2px; }
+.s-wallet-icon { font-size: 20px; }
+
+.s-btn {
+  border-radius: 8px; padding: 9px 10px;
+  margin-bottom: 6px; display: flex;
+  align-items: center; gap: 8px;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.03);
+  font-size: 8px;
+}
+.s-btn-icon { font-size: 14px; }
+.s-btn-text { color: var(--text); font-weight: 500; }
+.s-btn-sub { color: var(--text-faint); font-size: 7px; }
+.s-btn-arr { color: var(--text-faint); margin-left: auto; }
+.s-btn.active { border-color: rgba(0,255,136,0.25); background: rgba(0,255,136,0.05); }
+
+/* Screen: Make Money */
+.s-section-title {
+  font-size: 10px; font-weight: 600;
+  color: var(--green); margin-bottom: 10px;
+  letter-spacing: 0.04em;
+}
+
+/* Screen: Analysis */
+.s-token-header {
+  display: flex; justify-content: space-between;
+  align-items: flex-start; margin-bottom: 10px;
+}
+.s-token-name { font-size: 11px; font-weight: 600; color: var(--text); }
+.s-token-price { font-size: 10px; color: var(--green); }
+.s-token-change { font-size: 7px; }
+.s-token-change.up { color: var(--green); }
+
+.s-metric-row {
+  display: flex; justify-content: space-between;
+  padding: 5px 0; border-bottom: 1px solid rgba(255,255,255,0.04);
+  font-size: 7.5px;
+}
+.s-metric-key { color: var(--text-faint); }
+.s-metric-val { color: var(--text); }
+
+.s-verdict {
+  margin-top: 10px; padding: 8px;
+  border-radius: 8px; text-align: center;
+}
+.s-verdict.buy { background: rgba(0,255,136,0.12); border: 1px solid rgba(0,255,136,0.25); }
+.s-verdict.avoid { background: rgba(255,77,106,0.12); border: 1px solid rgba(255,77,106,0.25); }
+.s-verdict-label { font-size: 9px; font-weight: 600; }
+.s-verdict.buy .s-verdict-label { color: var(--green); }
+.s-verdict.avoid .s-verdict-label { color: var(--red); }
+.s-verdict-conf { font-size: 7px; color: var(--text-faint); margin-top: 2px; }
+
+/* Screen: Success / Trade */
+.s-success-icon {
+  text-align: center; font-size: 28px; margin: 12px 0 8px;
+}
+.s-success-title {
+  text-align: center; font-size: 11px; font-weight: 600;
+  color: var(--green); margin-bottom: 12px;
+}
+.s-trade-row {
+  display: flex; justify-content: space-between;
+  padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.04);
+  font-size: 7.5px;
+}
+.s-trade-key { color: var(--text-faint); }
+.s-trade-val { color: var(--text); }
+.s-trade-val.green { color: var(--green); }
+
+.s-action-row {
+  display: grid; grid-template-columns: 1fr 1fr 1fr;
+  gap: 4px; margin-top: 10px;
+}
+.s-action-btn {
+  border-radius: 6px; padding: 6px 4px;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.03);
+  text-align: center; font-size: 7px; color: var(--text-dim);
+}
+.s-action-btn .a-icon { font-size: 12px; display: block; margin-bottom: 2px; }
+
+/* Screen: Bank Withdrawal */
+.s-bank-card {
+  background: linear-gradient(135deg, #0D1520, #090E18);
+  border: 1px solid rgba(0,212,255,0.15);
+  border-radius: 10px; padding: 10px;
+  margin-bottom: 10px;
+}
+.s-bank-name { font-size: 8px; color: var(--text-dim); }
+.s-bank-acct { font-size: 10px; font-weight: 600; color: var(--text); margin-top: 2px; }
+.s-rate-row {
+  display: flex; justify-content: space-between;
+  padding: 5px 0; font-size: 7.5px;
+}
+.s-rate-key { color: var(--text-faint); }
+.s-rate-val { color: var(--cyan); }
+.s-confirm-btn {
+  width: 100%; margin-top: 10px;
+  background: var(--green); color: #000;
+  border-radius: 8px; padding: 9px;
+  font-size: 9px; font-weight: 700;
+  text-align: center; letter-spacing: 0.04em;
+}
+
+/* ── HOW IT WORKS ─────────────────────────────────────────── */
+#how-it-works { background: var(--bg); }
+
+.steps-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 2px; margin-top: 80px;
+  position: relative;
+}
+.steps-grid::before {
+  content: '';
+  position: absolute; top: 28px; left: 10%; right: 10%;
+  height: 1px; background: linear-gradient(90deg, transparent, var(--green), var(--cyan), transparent);
+  z-index: 0;
+}
+
+.step-card {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 32px 24px;
+  position: relative; z-index: 1;
+  transition: all 0.3s;
+}
+.step-card:hover {
+  border-color: var(--green);
+  transform: translateY(-4px);
+  box-shadow: var(--glow-green);
+}
+
+.step-num {
+  width: 44px; height: 44px;
+  background: var(--bg);
+  border: 1px solid var(--green);
+  border-radius: 50%;
+  display: grid; place-items: center;
+  font-family: var(--font-mono);
+  font-size: 14px; font-weight: 600;
+  color: var(--green);
+  margin-bottom: 20px;
+}
+.step-title {
+  font-family: var(--font-display);
+  font-size: 18px; font-weight: 700;
+  margin-bottom: 10px; letter-spacing: -0.01em;
+}
+.step-desc {
+  font-size: 12px; line-height: 1.7;
+  color: var(--text-dim); font-weight: 300;
+}
+
+/* ── NGN SECTION ──────────────────────────────────────────── */
+#ngn {
+  background: linear-gradient(180deg, var(--bg2) 0%, var(--bg) 100%);
+  border-top: 1px solid var(--border);
+}
+
+.ngn-inner {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 80px; align-items: center;
+}
+
+.ngn-flow {
+  display: flex; flex-direction: column; gap: 0;
+}
+
+.ngn-step {
+  display: flex; gap: 20px; align-items: flex-start;
+  padding: 20px 0;
+  border-bottom: 1px solid var(--border);
+  position: relative;
+}
+.ngn-step:last-child { border-bottom: none; }
+
+.ngn-step-num {
+  width: 32px; height: 32px; flex-shrink: 0;
+  background: rgba(0,212,255,0.1);
+  border: 1px solid rgba(0,212,255,0.25);
+  border-radius: 50%;
+  display: grid; place-items: center;
+  font-family: var(--font-mono); font-size: 11px;
+  color: var(--cyan); font-weight: 600;
+}
+.ngn-step-title {
+  font-size: 14px; font-weight: 600; margin-bottom: 4px;
+}
+.ngn-step-desc {
+  font-size: 12px; color: var(--text-dim);
+  line-height: 1.6; font-weight: 300;
+}
+
+.ngn-rate-card {
+  background: var(--bg3);
+  border: 1px solid rgba(0,212,255,0.15);
+  border-radius: 20px; padding: 32px;
+  box-shadow: var(--glow-cyan);
+}
+.ngn-rate-title {
+  font-family: var(--font-mono); font-size: 10px;
+  color: var(--cyan); letter-spacing: 0.08em;
+  text-transform: uppercase; margin-bottom: 20px;
+}
+.ngn-rate-row {
+  display: flex; justify-content: space-between;
+  align-items: center; padding: 14px 0;
+  border-bottom: 1px solid var(--border);
+}
+.ngn-rate-row:last-child { border-bottom: none; }
+.ngn-rate-label { font-size: 12px; color: var(--text-dim); }
+.ngn-rate-value {
+  font-family: var(--font-mono);
+  font-size: 18px; font-weight: 600; color: var(--text);
+}
+.ngn-rate-value.green { color: var(--green); }
+.ngn-rate-value.cyan  { color: var(--cyan); }
+
+/* ── PRICING ──────────────────────────────────────────────── */
+#pricing { background: var(--bg); }
+
+.pricing-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 24px; margin-top: 80px;
+}
+
+.pricing-card {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 20px; padding: 36px 28px;
+  position: relative; transition: all 0.3s;
+}
+.pricing-card.featured {
+  border-color: var(--green);
+  box-shadow: var(--glow-green);
+}
+.pricing-card:hover {
+  transform: translateY(-6px);
+  border-color: var(--green);
+}
+
+.pricing-featured-badge {
+  position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+  background: var(--green); color: #000;
+  font-family: var(--font-mono); font-size: 9px;
+  font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+  padding: 4px 14px; border-radius: 100px;
+  white-space: nowrap;
+}
+
+.pricing-tier {
+  font-family: var(--font-mono); font-size: 10px;
+  color: var(--text-faint); letter-spacing: 0.1em;
+  text-transform: uppercase; margin-bottom: 16px;
+}
+.pricing-price {
+  font-family: var(--font-mono);
+  font-size: 40px; font-weight: 600;
+  color: var(--text); margin-bottom: 4px;
+  letter-spacing: -0.02em;
+}
+.pricing-price sup { font-size: 18px; color: var(--text-dim); vertical-align: super; }
+.pricing-price sub { font-size: 14px; color: var(--text-faint); }
+.pricing-subtitle {
+  font-size: 12px; color: var(--text-dim); margin-bottom: 28px;
+}
+
+.pricing-features { list-style: none; margin-bottom: 32px; }
+.pricing-features li {
+  display: flex; gap: 10px; align-items: flex-start;
+  font-size: 12px; padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-dim);
+}
+.pricing-features li:last-child { border-bottom: none; }
+.pricing-features li::before {
+  content: '✓'; color: var(--green);
+  font-family: var(--font-mono); font-weight: 600;
+  flex-shrink: 0;
+}
+
+.pricing-cta {
+  display: block; width: 100%;
+  text-align: center;
+  padding: 13px;
+  border-radius: 8px;
+  font-family: var(--font-mono); font-size: 12px;
+  font-weight: 600; letter-spacing: 0.04em;
+  text-decoration: none; transition: all 0.25s;
+}
+.pricing-cta.outline {
+  border: 1px solid var(--border); color: var(--text);
+}
+.pricing-cta.outline:hover {
+  border-color: var(--green); color: var(--green);
+}
+.pricing-cta.solid {
+  background: var(--green); color: #000;
+}
+.pricing-cta.solid:hover {
+  background: #fff;
+  box-shadow: 0 4px 24px rgba(0,255,136,0.3);
+}
+
+/* ── SOCIAL PROOF ─────────────────────────────────────────── */
+#proof {
+  background: var(--bg2);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+
+.proof-stats {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 2px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  overflow: hidden;
+  margin-bottom: 80px;
+}
+.proof-stat-card {
+  background: var(--bg3);
+  padding: 40px 32px;
+  text-align: center;
+  transition: background 0.3s;
+}
+.proof-stat-card:hover { background: rgba(0,255,136,0.03); }
+.proof-stat-num {
+  font-family: var(--font-mono);
+  font-size: 42px; font-weight: 600;
+  color: var(--green); letter-spacing: -0.02em;
+  margin-bottom: 8px;
+}
+.proof-stat-label {
+  font-size: 11px; color: var(--text-faint);
+  letter-spacing: 0.06em; text-transform: uppercase;
+  font-family: var(--font-mono);
+}
+
+/* ── CTA SECTION ──────────────────────────────────────────── */
+#final-cta {
+  padding: 160px 48px;
+  text-align: center;
+  position: relative; overflow: hidden;
+}
+
+.cta-bg {
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 70% 50% at 50% 50%, rgba(0,255,136,0.06), transparent),
+    radial-gradient(ellipse 40% 30% at 30% 70%, rgba(0,212,255,0.04), transparent);
+}
+
+.cta-headline {
+  font-family: var(--font-display);
+  font-size: clamp(40px, 6vw, 80px);
+  font-weight: 900; line-height: 1.0;
+  letter-spacing: -0.03em;
+  max-width: 800px; margin: 0 auto 24px;
+  position: relative; z-index: 2;
+}
+.cta-headline em { font-style: italic; color: var(--green); }
+
+.cta-sub {
+  font-size: 16px; color: var(--text-dim);
+  max-width: 480px; margin: 0 auto 48px;
+  line-height: 1.7; font-weight: 300;
+  position: relative; z-index: 2;
+}
+
+.cta-buttons {
+  display: flex; gap: 16px; justify-content: center;
+  flex-wrap: wrap; position: relative; z-index: 2;
+}
+
+/* ── FOOTER ───────────────────────────────────────────────── */
+footer {
+  background: var(--bg2);
+  border-top: 1px solid var(--border);
+  padding: 60px 48px 40px;
+}
+
+.footer-inner {
+  max-width: 1200px; margin: 0 auto;
+  display: grid; grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: 60px; margin-bottom: 48px;
+}
+
+.footer-brand-desc {
+  font-size: 13px; color: var(--text-faint);
+  line-height: 1.7; margin-top: 16px; max-width: 280px;
+  font-weight: 300;
+}
+
+.footer-col-title {
+  font-family: var(--font-mono); font-size: 10px;
+  color: var(--text-dim); letter-spacing: 0.1em;
+  text-transform: uppercase; margin-bottom: 20px;
+}
+.footer-links { list-style: none; }
+.footer-links li { margin-bottom: 12px; }
+.footer-links a {
+  font-size: 13px; color: var(--text-faint);
+  text-decoration: none; transition: color 0.2s;
+}
+.footer-links a:hover { color: var(--green); }
+
+.footer-bottom {
+  max-width: 1200px; margin: 0 auto;
+  display: flex; justify-content: space-between;
+  align-items: center; padding-top: 24px;
+  border-top: 1px solid var(--border);
+  font-family: var(--font-mono);
+  font-size: 11px; color: var(--text-faint);
+}
+
+/* ── SCROLL ANIMATIONS ────────────────────────────────────── */
+.reveal {
+  opacity: 0; transform: translateY(30px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+.reveal.visible { opacity: 1; transform: translateY(0); }
+.reveal-delay-1 { transition-delay: 0.1s; }
+.reveal-delay-2 { transition-delay: 0.2s; }
+.reveal-delay-3 { transition-delay: 0.3s; }
+.reveal-delay-4 { transition-delay: 0.4s; }
+
+/* ── MOBILE ───────────────────────────────────────────────── */
+@media (max-width: 900px) {
+  nav { padding: 16px 24px; }
+  .nav-links { display: none; }
+  section { padding: 80px 24px; }
+  #hero { padding: 100px 24px 60px; }
+  .hero-inner { grid-template-columns: 1fr; gap: 60px; }
+  .hero-phone-wrap { order: -1; }
+  .features-grid { grid-template-columns: 1fr; }
+  .feature-card { border-right: none; }
+  .steps-grid { grid-template-columns: 1fr 1fr; }
+  .ngn-inner { grid-template-columns: 1fr; }
+  .pricing-grid { grid-template-columns: 1fr; }
+  .proof-stats { grid-template-columns: 1fr 1fr; }
+  .footer-inner { grid-template-columns: 1fr 1fr; gap: 40px; }
+  .stream-grid { grid-template-columns: 1fr; }
+  .screens-row { gap: 16px; }
+  .phone-lg { transform: none; }
+  #agent-stream { padding: 60px 24px; }
+}
+</style>
+</head>
+
+<body>
+
+<!-- ── NAVIGATION ──────────────────────────────────────────── -->
+<nav id="navbar">
+  <a href="#" class="nav-logo">
+    <div class="nav-logo-mark">CB</div>
+    <span class="nav-logo-text">Click<span>Bot</span></span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#features">Features</a></li>
+    <li><a href="#screens">Screens</a></li>
+    <li><a href="#how-it-works">How it works</a></li>
+    <li><a href="#ngn">NGN Bridge</a></li>
+    <li><a href="#pricing">Pricing</a></li>
+    <li><a href="https://clickshift.io/faq">FAQ</a></li>
+    <li><a href="https://clickshift.io">ClickShift.io</a></li>
+    <li><a href="https://t.me/clicksolbot" class="nav-cta">Start Trading →</a></li>
+  </ul>
+</nav>
+
+<!-- ── HERO ────────────────────────────────────────────────── -->
+<section id="hero">
+  <div class="hero-grid-bg"></div>
+  <div class="hero-orb-1"></div>
+  <div class="hero-orb-2"></div>
+
+  <div class="hero-inner">
+    <div class="hero-content">
+      <div class="hero-badge">Live on Solana Mainnet</div>
+
+      <h1 class="hero-headline">
+        The <em>Web3 Siri</em><br>
+        for Solana<br>
+        Traders
+      </h1>
+
+      <p class="hero-sub">
+        AI-powered analysis. MEV-protected execution. New launch sniping, copy trading, perps — and direct cash-out to your bank. All inside Telegram.
+      </p>
+
+      <div class="hero-ctas">
+        <a href="https://t.me/clicksolbot" class="btn-primary">
+          <span class="icon">✈️</span> Open in Telegram
+        </a>
+        <a href="#how-it-works" class="btn-secondary">
+          See how it works →
+        </a>
+      </div>
+
+      <div class="hero-stats">
+        <div class="hero-stat">
+          <div class="hero-stat-num">5<span>+</span></div>
+          <div class="hero-stat-label">Trading Modules</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-num">6<span>signals</span></div>
+          <div class="hero-stat-label">AI Analysis</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-num">0<span>P2P</span></div>
+          <div class="hero-stat-label">NGN Cash-out</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Hero Phone -->
+    <div class="hero-phone-wrap">
+      <div class="float-chip green chip-1">🟢 BONK +47.2% — Trailing active</div>
+      <div class="float-chip cyan chip-2">⚡ Snipe executed — 0.01s</div>
+      <div class="float-chip gold chip-3">💰 ₦18,400 sent to GTBank</div>
+      <div class="float-chip chip-4">🔄 Copying wallet 0x8f2...</div>
+
+      <div class="phone-mockup">
+        <div class="phone-notch"></div>
+        <div class="phone-screen">
+          <div class="phone-header">
+            <span style="font-size:9px;color:var(--text-faint)">9:41</span>
+            <span class="phone-header-title">ClickBot</span>
+            <span style="font-size:9px;color:var(--green)">●</span>
+          </div>
+
+          <div class="phone-balance-card">
+            <div class="phone-balance-label">Portfolio Value</div>
+            <div class="phone-balance-amount">12.84 SOL</div>
+            <div class="phone-balance-usd">≈ $1,926.00 USD · 🟢 +4.2% today</div>
+          </div>
+
+          <div class="phone-analysis">
+            <div class="analysis-token">$PEPE analysis</div>
+            <div class="analysis-row">
+              <span>RSI (14)</span>
+              <span class="val">28 — Oversold</span>
+            </div>
+            <div class="analysis-row">
+              <span>Momentum</span>
+              <span class="val">71/100</span>
+            </div>
+            <div class="analysis-row">
+              <span>Holder Risk</span>
+              <span class="val" style="color:var(--green)">LOW</span>
+            </div>
+            <div class="analysis-row">
+              <span>Buy Pressure</span>
+              <span class="val">68% buys</span>
+            </div>
+            <div class="analysis-verdict">🟢 BUY — HIGH CONFIDENCE · 86/100</div>
+          </div>
+
+          <div class="phone-menu-grid" style="margin-top:10px">
+            <div class="phone-menu-btn">
+              <div class="menu-icon">🛒</div>
+              <div class="menu-label">Trade Tokens</div>
+            </div>
+            <div class="phone-menu-btn" style="border-color:rgba(0,255,136,0.25);background:rgba(0,255,136,0.05)">
+              <div class="menu-icon">🎯</div>
+              <div class="menu-label">Sniper</div>
+            </div>
+            <div class="phone-menu-btn">
+              <div class="menu-icon">🔄</div>
+              <div class="menu-label">Copy Trade</div>
+            </div>
+            <div class="phone-menu-btn">
+              <div class="menu-icon">🏦</div>
+              <div class="menu-label">Withdraw ₦</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── TICKER ───────────────────────────────────────────────── -->
+<div class="ticker-wrap">
+  <div class="ticker-track" id="ticker">
+    <div class="ticker-item"><span class="ticker-symbol">SOL/USDC</span><span class="ticker-price">$150.24</span><span class="ticker-change up">+2.4%</span></div>
+    <div class="ticker-item"><span class="ticker-symbol">BTC/USDC</span><span class="ticker-price">$67,441</span><span class="ticker-change up">+1.1%</span></div>
+    <div class="ticker-item"><span class="ticker-symbol">ETH/USDC</span><span class="ticker-price">$3,210</span><span class="ticker-change down">-0.8%</span></div>
+    <div class="ticker-item"><span class="ticker-symbol">BONK/SOL</span><span class="ticker-price">$0.0000241</span><span class="ticker-change up">+12.7%</span></div>
+    <div class="ticker-item"><span class="ticker-symbol">JUP/SOL</span><span class="ticker-price">$0.842</span><span class="ticker-change up">+5.3%</span></div>
+    <div class="ticker-item"><span class="ticker-symbol">WIF/USDC</span><span class="ticker-price">$2.14</span><span class="ticker-change down">-1.2%</span></div>
+    <div class="ticker-item"><span class="ticker-symbol">PYTH/SOL</span><span class="ticker-price">$0.431</span><span class="ticker-change up">+3.6%</span></div>
+    <div class="ticker-item"><span class="ticker-symbol">MEME/SOL</span><span class="ticker-price">$0.0312</span><span class="ticker-change up">+28.4%</span></div>
+    <!-- duplicated for seamless loop -->
+    <div class="ticker-item"><span class="ticker-symbol">SOL/USDC</span><span class="ticker-price">$150.24</span><span class="ticker-change up">+2.4%</span></div>
+    <div class="ticker-item"><span class="ticker-symbol">BTC/USDC</span><span class="ticker-price">$67,441</span><span class="ticker-change up">+1.1%</span></div>
+    <div class="ticker-item"><span class="ticker-symbol">ETH/USDC</span><span class="ticker-price">$3,210</span><span class="ticker-change down">-0.8%</span></div>
+    <div class="ticker-item"><span class="ticker-symbol">BONK/SOL</span><span class="ticker-price">$0.0000241</span><span class="ticker-change up">+12.7%</span></div>
+    <div class="ticker-item"><span class="ticker-symbol">JUP/SOL</span><span class="ticker-price">$0.842</span><span class="ticker-change up">+5.3%</span></div>
+    <div class="ticker-item"><span class="ticker-symbol">WIF/USDC</span><span class="ticker-price">$2.14</span><span class="ticker-change down">-1.2%</span></div>
+    <div class="ticker-item"><span class="ticker-symbol">PYTH/SOL</span><span class="ticker-price">$0.431</span><span class="ticker-change up">+3.6%</span></div>
+    <div class="ticker-item"><span class="ticker-symbol">MEME/SOL</span><span class="ticker-price">$0.0312</span><span class="ticker-change up">+28.4%</span></div>
+  </div>
+</div>
+
+<!-- ── AGENT STREAM ─────────────────────────────────────────── -->
+<section id="agent-stream">
+  <div class="stream-bg"></div>
+  <div class="section-inner">
+    <div class="stream-grid">
+      <div>
+        <div class="section-label">AI Engine</div>
+        <h2 class="section-title">Your agents<br>never <em>sleep</em></h2>
+        <p class="section-body" style="margin-bottom:32px">
+          While you live your life, ClickBot's intelligence layer monitors prices, reads wallet flows, detects volume surges, and manages your exits — narrating every decision in real time.
+        </p>
+        <a href="https://t.me/clicksolbot" class="btn-primary" style="display:inline-flex">
+          <span>Start Trading Free</span>
+        </a>
+      </div>
+
+      <div class="stream-terminal">
+        <div class="terminal-bar">
+          <div class="terminal-dot r"></div>
+          <div class="terminal-dot y"></div>
+          <div class="terminal-dot g"></div>
+          <span class="terminal-title">clickbot — agent stream — live</span>
+        </div>
+        <div class="terminal-body" id="stream-output">
+          <!-- Injected by JS -->
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── FEATURES ─────────────────────────────────────────────── -->
+<section id="features">
+  <div class="section-inner">
+    <div class="reveal">
+      <div class="section-label">What's inside</div>
+      <h2 class="section-title">Everything a serious<br>trader needs — <em>one bot</em></h2>
+    </div>
+
+    <div class="features-grid">
+      <div class="feature-card reveal reveal-delay-1">
+        <span class="feature-icon">🧠</span>
+        <div class="feature-name">AI Token Analysis</div>
+        <p class="feature-desc">Real 14-period RSI from live candles, buy/sell pressure, volume surge detection, holder concentration risk, and liquidity depth — six signals producing one scored recommendation with full reasoning shown.</p>
+        <span class="feature-tag">6-signal engine</span>
+      </div>
+      <div class="feature-card reveal reveal-delay-2">
+        <span class="feature-icon">⚡</span>
+        <div class="feature-name">MEV-Protected Trading</div>
+        <p class="feature-desc">Trades route through Jito bundle infrastructure, bypassing the public Solana mempool. No sandwich attacks. No frontrunning. Priority confirmation. The difference between getting filled and getting wrecked.</p>
+        <span class="feature-tag">Jito bundles</span>
+      </div>
+      <div class="feature-card reveal reveal-delay-3">
+        <span class="feature-icon">🎯</span>
+        <div class="feature-name">Launch Sniper</div>
+        <p class="feature-desc">Instant and limit-order sniping on new launches. TP/SL/Trailing arms fire automatically post-execution. New mints are millisecond races — our Jito routing lands in the same block as pool creation.</p>
+        <span class="feature-tag">Instant + Limit modes</span>
+      </div>
+      <div class="feature-card reveal reveal-delay-1">
+        <span class="feature-icon">🔄</span>
+        <div class="feature-name">Copy Trading</div>
+        <p class="feature-desc">Mirror on-chain activity of curated alpha wallets in real time. Set your copy amount once — every buy and exit fires automatically into your wallet with full position management buttons.</p>
+        <span class="feature-tag">Real-time mirroring</span>
+      </div>
+      <div class="feature-card reveal reveal-delay-2">
+        <span class="feature-icon">📈</span>
+        <div class="feature-name">Trailing Profit Engine</div>
+        <p class="feature-desc">Follows the pump to the peak. When price drops your configured percentage from the top, ClickBot exits automatically. Set it after every buy and sleep — the engine never stops watching.</p>
+        <span class="feature-tag">24/7 monitoring</span>
+      </div>
+      <div class="feature-card reveal reveal-delay-3">
+        <span class="feature-icon">🏦</span>
+        <div class="feature-name">Fiat Bridge — Nigeria</div>
+        <p class="feature-desc">NGN → USDC via virtual bank account with no P2P. USDC → any Nigerian bank in minutes. One platform takes you from a meme coin launch all the way to Naira in your account.</p>
+        <span class="feature-tag">NGN ↔ USDC · No P2P</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── SCREENS SHOWCASE ──────────────────────────────────────── -->
+<section id="screens">
+  <div class="section-inner">
+    <div class="screens-header reveal">
+      <div class="section-label">In your hands</div>
+      <h2 class="section-title">Every screen, <em>crafted</em></h2>
+      <p class="section-body" style="margin: 0 auto; text-align: center; margin-top: 16px;">
+        Replace the placeholder screenshots below with your real bot screenshots for maximum impact.
+      </p>
+    </div>
+
+    <div class="screens-row">
+
+      <!-- Screen 1: Main Menu -->
+      <div class="screen-item reveal reveal-delay-1">
+        <div class="screen-phone phone-md" style="animation: phoneFloat 7s ease-in-out infinite;">
+          <div class="screen-notch"></div>
+          <div class="screen-body">
+            <div class="s-header">
+              <div class="s-welcome">Good morning, Emmanuel 👋</div>
+              <div class="s-title">ClickBot</div>
+            </div>
+            <div class="s-wallet-strip">
+              <div>
+                <div class="s-sol">12.84 SOL</div>
+                <div class="s-usd">≈ $1,926 USD</div>
+              </div>
+              <div class="s-wallet-icon">💼</div>
+            </div>
+            <div class="s-btn active">
+              <span class="s-btn-icon">💰</span>
+              <div><div class="s-btn-text">Make Money</div><div class="s-btn-sub">Trade, Snipe, Copy</div></div>
+              <span class="s-btn-arr">›</span>
+            </div>
+            <div class="s-btn">
+              <span class="s-btn-icon">🏦</span>
+              <div><div class="s-btn-text">Move Money</div><div class="s-btn-sub">Withdraw, Transfer</div></div>
+              <span class="s-btn-arr">›</span>
+            </div>
+            <div class="s-btn">
+              <span class="s-btn-icon">📊</span>
+              <div><div class="s-btn-text">Portfolio</div><div class="s-btn-sub">P&L · Holdings</div></div>
+              <span class="s-btn-arr">›</span>
+            </div>
+            <div class="s-btn">
+              <span class="s-btn-icon">🎁</span>
+              <div><div class="s-btn-text">Refer & Earn</div><div class="s-btn-sub">20% forever</div></div>
+              <span class="s-btn-arr">›</span>
+            </div>
+          </div>
+        </div>
+        <div class="screen-label">Main Menu</div>
+      </div>
+
+      <!-- Screen 2: Make Money (center, larger) -->
+      <div class="screen-item reveal">
+        <div class="screen-phone phone-lg" style="animation: phoneFloat 6s ease-in-out infinite 0.5s;">
+          <div class="screen-notch"></div>
+          <div class="screen-body">
+            <div class="s-header" style="margin-bottom:8px">
+              <div class="s-title">Make Money</div>
+            </div>
+            <div class="s-section-title">💰 Choose your weapon</div>
+            <div class="s-btn active">
+              <span class="s-btn-icon">🛒</span>
+              <div><div class="s-btn-text">Trade Tokens</div><div class="s-btn-sub">Buy & sell any Solana token</div></div>
+              <span class="s-btn-arr">›</span>
+            </div>
+            <div class="s-btn">
+              <span class="s-btn-icon">🎯</span>
+              <div><div class="s-btn-text">Sniper</div><div class="s-btn-sub">Catch launches early</div></div>
+              <span class="s-btn-arr">›</span>
+            </div>
+            <div class="s-btn">
+              <span class="s-btn-icon">🔄</span>
+              <div><div class="s-btn-text">Copy Trading</div><div class="s-btn-sub">Mirror alpha wallets</div></div>
+              <span class="s-btn-arr">›</span>
+            </div>
+            <div class="s-btn">
+              <span class="s-btn-icon">📈</span>
+              <div><div class="s-btn-text">Trade Perps</div><div class="s-btn-sub">5x leverage · Long & Short</div></div>
+              <span class="s-btn-arr">›</span>
+            </div>
+            <div class="s-btn">
+              <span class="s-btn-icon">🎁</span>
+              <div><div class="s-btn-text">Refer & Earn</div><div class="s-btn-sub">20% commission forever</div></div>
+              <span class="s-btn-arr">›</span>
+            </div>
+          </div>
+        </div>
+        <div class="screen-label">Make Money Menu</div>
+      </div>
+
+      <!-- Screen 3: Analysis Result -->
+      <div class="screen-item reveal reveal-delay-2">
+        <div class="screen-phone phone-md" style="animation: phoneFloat 8s ease-in-out infinite 1s;">
+          <div class="screen-notch"></div>
+          <div class="screen-body">
+            <div class="s-token-header">
+              <div>
+                <div class="s-token-name">$BONK</div>
+                <div style="font-size:7px;color:var(--text-faint)">Bonk Token</div>
+              </div>
+              <div style="text-align:right">
+                <div class="s-token-price">$0.00002410</div>
+                <div class="s-token-change up">+47.2% 24h</div>
+              </div>
+            </div>
+            <div class="s-metric-row"><span class="s-metric-key">RSI (14)</span><span class="s-metric-val" style="color:var(--green)">28 — Oversold</span></div>
+            <div class="s-metric-row"><span class="s-metric-key">Momentum</span><span class="s-metric-val">71/100</span></div>
+            <div class="s-metric-row"><span class="s-metric-key">Buy Pressure</span><span class="s-metric-val">68% buys</span></div>
+            <div class="s-metric-row"><span class="s-metric-key">Liquidity</span><span class="s-metric-val" style="color:var(--green)">$2.4M Deep</span></div>
+            <div class="s-metric-row"><span class="s-metric-key">Holder Risk</span><span class="s-metric-val" style="color:var(--green)">LOW</span></div>
+            <div class="s-metric-row"><span class="s-metric-key">Volume 1h</span><span class="s-metric-val">$140K ↑ Surge</span></div>
+            <div class="s-verdict buy">
+              <div class="s-verdict-label">🟢 BUY RECOMMENDATION</div>
+              <div class="s-verdict-conf">Score 86/100 · HIGH confidence</div>
+            </div>
+          </div>
+        </div>
+        <div class="screen-label">AI Analysis</div>
+      </div>
+
+      <!-- Screen 4: Bank Withdrawal -->
+      <div class="screen-item reveal reveal-delay-3">
+        <div class="screen-phone phone-md" style="animation: phoneFloat 9s ease-in-out infinite 1.5s;">
+          <div class="screen-notch"></div>
+          <div class="screen-body">
+            <div class="s-header" style="margin-bottom:10px">
+              <div class="s-title">Withdraw to Bank</div>
+            </div>
+            <div class="s-success-icon">🏦</div>
+            <div class="s-bank-card">
+              <div class="s-bank-name">GTBank · 0123456789</div>
+              <div class="s-bank-acct">Emmanuel Adeyemi ✅</div>
+            </div>
+            <div class="s-rate-row"><span class="s-rate-key">Amount</span><span class="s-rate-val">50 USDC</span></div>
+            <div class="s-rate-row"><span class="s-rate-key">Live Rate</span><span class="s-rate-val" style="color:var(--cyan)">₦1,648/$1</span></div>
+            <div class="s-rate-row"><span class="s-rate-key">Fee (1%)</span><span class="s-rate-val">0.50 USDC</span></div>
+            <div class="s-rate-row"><span class="s-rate-key">You receive</span><span class="s-rate-val" style="color:var(--green);font-size:11px">₦81,576</span></div>
+            <div class="s-confirm-btn">✅ CONFIRM & WITHDRAW</div>
+          </div>
+        </div>
+        <div class="screen-label">Bank Withdrawal</div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ── HOW IT WORKS ──────────────────────────────────────────── -->
+<section id="how-it-works">
+  <div class="section-inner">
+    <div class="reveal" style="text-align:center; margin-bottom: 0;">
+      <div class="section-label" style="justify-content:center"><span style="display:none">—</span></div>
+      <h2 class="section-title">Zero to trading in <em>4 steps</em></h2>
+      <p class="section-body" style="margin: 0 auto; text-align:center;">No exchange account. No KYC walls. No Phantom setup. Just Telegram.</p>
+    </div>
+
+    <div class="steps-grid">
+      <div class="step-card reveal reveal-delay-1">
+        <div class="step-num">01</div>
+        <div class="step-title">Create Wallet</div>
+        <p class="step-desc">Open ClickBot on Telegram. A non-custodial Solana wallet is created instantly. You receive a 12-word phrase — only you hold your keys.</p>
+      </div>
+      <div class="step-card reveal reveal-delay-2">
+        <div class="step-num">02</div>
+        <div class="step-title">Fund It</div>
+        <p class="step-desc">Deposit SOL from any exchange or wallet. Or buy USDC directly with Naira via bank transfer — no P2P, no exchange account needed.</p>
+      </div>
+      <div class="step-card reveal reveal-delay-3">
+        <div class="step-num">03</div>
+        <div class="step-title">Analyze & Trade</div>
+        <p class="step-desc">Paste any Solana contract address. Get a full AI risk analysis in seconds. Then buy, snipe, or copy a proven wallet — in one tap.</p>
+      </div>
+      <div class="step-card reveal reveal-delay-4">
+        <div class="step-num">04</div>
+        <div class="step-title">Protect & Cash Out</div>
+        <p class="step-desc">Set trailing profit. ClickBot manages your exit 24/7. When you're done — sell, swap to USDC, and withdraw Naira to your bank in minutes.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── NGN BRIDGE ────────────────────────────────────────────── -->
+<section id="ngn">
+  <div class="section-inner">
+    <div class="ngn-inner">
+      <div class="reveal">
+        <div class="section-label">Nigeria First</div>
+        <h2 class="section-title">Trade crypto.<br><em>Bank Naira.</em></h2>
+        <p class="section-body" style="margin-bottom: 48px;">
+          The first Solana trading bot with a real fiat bridge. Token profit → USDC → your bank account, in under 5 minutes. No P2P. No exchange. No waiting.
+        </p>
+
+        <div class="ngn-flow">
+          <div class="ngn-step">
+            <div class="ngn-step-num">1</div>
+            <div>
+              <div class="ngn-step-title">Verify once with BVN</div>
+              <p class="ngn-step-desc">One-time BVN verification per CBN regulations. Takes 30 seconds.</p>
+            </div>
+          </div>
+          <div class="ngn-step">
+            <div class="ngn-step-num">2</div>
+            <div>
+              <div class="ngn-step-title">Get your virtual account</div>
+              <p class="ngn-step-desc">A permanent bank account is assigned to you. Transfer Naira to buy USDC anytime.</p>
+            </div>
+          </div>
+          <div class="ngn-step">
+            <div class="ngn-step-num">3</div>
+            <div>
+              <div class="ngn-step-title">Trade on Solana</div>
+              <p class="ngn-step-desc">Swap USDC → SOL → trade any token. Full trading suite at your fingertips.</p>
+            </div>
+          </div>
+          <div class="ngn-step">
+            <div class="ngn-step-num">4</div>
+            <div>
+              <div class="ngn-step-title">Withdraw profits to your bank</div>
+              <p class="ngn-step-desc">Sell → USDC → enter account number → Naira hits your account in minutes.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ngn-rate-card reveal reveal-delay-2">
+        <div class="ngn-rate-title">💱 Live Bridge Rates</div>
+        <div class="ngn-rate-row">
+          <span class="ngn-rate-label">Exchange Rate</span>
+          <div class="ngn-rate-value cyan" id="live-rate">₦1,648 / $1</div>
+        </div>
+        <div class="ngn-rate-row">
+          <span class="ngn-rate-label">Withdrawal Fee</span>
+          <div class="ngn-rate-value">1%</div>
+        </div>
+        <div class="ngn-rate-row">
+          <span class="ngn-rate-label">Minimum</span>
+          <div class="ngn-rate-value">5 USDC</div>
+        </div>
+        <div class="ngn-rate-row">
+          <span class="ngn-rate-label">Settlement Time</span>
+          <div class="ngn-rate-value green">~3 minutes</div>
+        </div>
+        <div class="ngn-rate-row">
+          <span class="ngn-rate-label">Supported Banks</span>
+          <div class="ngn-rate-value" style="font-size:12px;text-align:right">GTBank, Access,<br>Zenith, Kuda, Opay<br>+ 200 more</div>
+        </div>
+        <a href="https://t.me/clicksolbot" class="btn-primary" style="margin-top:28px; display:flex; justify-content:center; text-decoration:none;">
+          Start Banking Crypto
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── PROOF ─────────────────────────────────────────────────── -->
+<section id="proof">
+  <div class="section-inner">
+    <div class="proof-stats reveal">
+      <div class="proof-stat-card">
+        <div class="proof-stat-num" id="count-modules">0</div>
+        <div class="proof-stat-label">Trading Modules Live</div>
+      </div>
+      <div class="proof-stat-card">
+        <div class="proof-stat-num" id="count-signals">0</div>
+        <div class="proof-stat-label">AI Analysis Signals</div>
+      </div>
+      <div class="proof-stat-card">
+        <div class="proof-stat-num" id="count-banks">0</div>
+        <div class="proof-stat-label">Supported Banks</div>
+      </div>
+      <div class="proof-stat-card">
+        <div class="proof-stat-num" id="count-zero">0</div>
+        <div class="proof-stat-label">P2P Required</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── PRICING ───────────────────────────────────────────────── -->
+<section id="pricing">
+  <div class="section-inner">
+    <div class="reveal" style="text-align:center">
+      <div class="section-label" style="justify-content:center"><span></span></div>
+      <h2 class="section-title">Transparent <em>pricing</em></h2>
+      <p class="section-body" style="margin: 16px auto 0; text-align:center;">No hidden fees. Pay only for what you use.</p>
+    </div>
+
+    <div class="pricing-grid">
+      <div class="pricing-card reveal reveal-delay-1">
+        <div class="pricing-tier">Free Trader</div>
+        <div class="pricing-price"><sup>$</sup>0<sub>/forever</sub></div>
+        <div class="pricing-subtitle">Everything you need to start</div>
+        <ul class="pricing-features">
+          <li>Full AI token analysis</li>
+          <li>Spot buy & sell (1% fee)</li>
+          <li>Copy trading</li>
+          <li>Trailing profit engine</li>
+          <li>NGN fiat bridge</li>
+          <li>Referral program (20%)</li>
+          <li>Standard RPC routing</li>
+        </ul>
+        <a href="https://t.me/clicksolbot" class="pricing-cta outline">Start Free →</a>
+      </div>
+
+      <div class="pricing-card featured reveal">
+        <div class="pricing-featured-badge">Most Popular</div>
+        <div class="pricing-tier">Ultra Speed</div>
+        <div class="pricing-price"><sup>$</sup>20<sub>/mo</sub></div>
+        <div class="pricing-subtitle">MEV protection on every trade</div>
+        <ul class="pricing-features">
+          <li>Everything in Free</li>
+          <li>Unlimited Jito bundle trades</li>
+          <li>No per-trade ultra fee</li>
+          <li>Priority block inclusion</li>
+          <li>Anti-sandwich protection</li>
+          <li>Anti-frontrun routing</li>
+          <li>Best for active traders</li>
+        </ul>
+        <a href="https://t.me/clicksolbot" class="pricing-cta solid">Subscribe Now →</a>
+      </div>
+
+      <div class="pricing-card reveal reveal-delay-2">
+        <div class="pricing-tier">Sniper Pro</div>
+        <div class="pricing-price"><sup>$</sup>20<sub>/mo</sub></div>
+        <div class="pricing-subtitle">For launch hunters</div>
+        <ul class="pricing-features">
+          <li>Everything in Free</li>
+          <li>Ultra Speed on all snipes</li>
+          <li>Instant + limit sniping</li>
+          <li>Auto TP/SL post-snipe</li>
+          <li>Pending snipe manager</li>
+          <li>3% execution fee on trades</li>
+          <li>Best for new launch traders</li>
+        </ul>
+        <a href="https://t.me/clicksolbot" class="pricing-cta outline">Get Sniper Pro →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── FINAL CTA ──────────────────────────────────────────────── -->
+<section id="final-cta">
+  <div class="cta-bg"></div>
+  <div class="section-inner">
+    <h2 class="cta-headline reveal">
+      Stop trading blind.<br>
+      Start trading <em>smart.</em>
+    </h2>
+    <p class="cta-sub reveal reveal-delay-1">
+      The tool built by a trader who lost 9 months of salary — so you don't have to.
+    </p>
+    <div class="cta-buttons reveal reveal-delay-2">
+      <a href="https://t.me/clicksolbot" class="btn-primary">
+        <span class="icon">✈️</span> Open ClickBot on Telegram
+      </a>
+      <a href="https://clickshift.io/faq" class="btn-secondary">
+        Read the FAQ →
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ── FOOTER ─────────────────────────────────────────────────── -->
+<footer>
+  <div class="footer-inner">
+    <div>
+      <a href="#" class="nav-logo" style="text-decoration:none;display:flex;align-items:center;gap:10px;margin-bottom:0">
+        <div class="nav-logo-mark">CB</div>
+        <span class="nav-logo-text">Click<span>Bot</span></span>
+      </a>
+      <p class="footer-brand-desc">
+        The Web3 Siri for Solana traders. Built by ClickShift — starting in Nigeria, expanding globally.
+      </p>
+    </div>
+
+    <div>
+      <div class="footer-col-title">Product</div>
+      <ul class="footer-links">
+        <li><a href="#features">Features</a></li>
+        <li><a href="#how-it-works">How it works</a></li>
+        <li><a href="#pricing">Pricing</a></li>
+        <li><a href="#ngn">NGN Bridge</a></li>
+        <li><a href="https://clickshift.io/faq">FAQ</a></li>
+      </ul>
+    </div>
+
+    <div>
+      <div class="footer-col-title">Company</div>
+      <ul class="footer-links">
+        <li><a href="https://clickshift.io">ClickShift.io</a></li>
+        <li><a href="https://t.me/ClickShiftAlerts">Telegram Community</a></li>
+        <li><a href="mailto:support@clickshift.io">support@clickshift.io</a></li>
+      </ul>
+    </div>
+
+    <div>
+      <div class="footer-col-title">Trade</div>
+      <ul class="footer-links">
+        <li><a href="https://t.me/clicksolbot">Spot Trading</a></li>
+        <li><a href="https://t.me/clicksolbot">Sniper</a></li>
+        <li><a href="https://t.me/clicksolbot">Copy Trading</a></li>
+        <li><a href="https://t.me/clicksolbot">Perps</a></li>
+        <li><a href="https://t.me/clicksolbot">NGN Withdrawal</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="footer-bottom">
+    <span>© 2025 ClickShift. Built on Solana.</span>
+    <span style="color:var(--text-faint)">
+      clickbot.clickshift.io · 
+      <a href="https://clickshift.io" style="color:var(--text-faint);text-decoration:none;">clickshift.io</a>
+    </span>
+  </div>
+</footer>
+
+<!-- ── JAVASCRIPT ─────────────────────────────────────────────── -->
+<script>
+// ── NAV SCROLL ──────────────────────────────────────────────────
+window.addEventListener('scroll', () => {
+  document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 40);
+});
+
+// ── REVEAL ON SCROLL ────────────────────────────────────────────
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.1 });
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+// ── AGENT STREAM SIMULATION ────────────────────────────────────
+const streamLines = [
+  { agent: 'analyzer', cls: 'agent-analyzer', msg: 'Scanning <span class="highlight">$BONK</span> — fetching OHLCV candles...' },
+  { agent: 'analyzer', cls: 'agent-analyzer', msg: 'Real RSI(14): <span class="val-green">28.4</span> — oversold territory confirmed' },
+  { agent: 'analyzer', cls: 'agent-analyzer', msg: 'Buy pressure 1h: <span class="val-green">68%</span> · Volume surge: <span class="val-green">🚀 +240% vs avg</span>' },
+  { agent: 'analyzer', cls: 'agent-analyzer', msg: 'Holder risk: <span class="val-green">LOW</span> · Top wallet: <span class="val-green">8.2%</span>' },
+  { agent: 'analyzer', cls: 'agent-analyzer', msg: 'Liquidity: <span class="val-green">$2.4M</span> · Score: <span class="val-green">86/100</span> → BUY signal' },
+  { agent: 'guardian', cls: 'agent-guardian', msg: 'Running safety checks on <span class="highlight">$BONK</span>...' },
+  { agent: 'guardian', cls: 'agent-guardian', msg: '7-check pass: rug risk <span class="val-green">LOW</span> · liquidity <span class="val-green">SAFE</span> · age <span class="val-green">OK</span>' },
+  { agent: 'sniper',   cls: 'agent-sniper',   msg: 'Limit snipe queued — target <span class="val-cyan">$0.0000220</span> · 0.01 SOL' },
+  { agent: 'sniper',   cls: 'agent-sniper',   msg: 'Price touched <span class="val-cyan">$0.0000221</span> — executing...' },
+  { agent: 'executor', cls: 'agent-executor', msg: 'Jito bundle submitted — bypassing mempool' },
+  { agent: 'executor', cls: 'agent-executor', msg: 'Confirmed in block <span class="val-green">✅</span> — no frontrun detected' },
+  { agent: 'executor', cls: 'agent-executor', msg: '<span class="val-green">841,000</span> BONK received · entry <span class="highlight">$0.0000221</span>' },
+  { agent: 'guardian', cls: 'agent-guardian', msg: 'Activating trailing profit — kicks at <span class="val-gold">2x</span>, trail <span class="val-gold">15%</span>' },
+  { agent: 'analyzer', cls: 'agent-analyzer', msg: 'Monitoring 24/7 — next price check in <span class="highlight">20s</span>' },
+  { agent: 'guardian', cls: 'agent-guardian', msg: 'Peak detected: <span class="val-green">$0.0000481</span> — trailing stop set <span class="val-green">$0.0000409</span>' },
+  { agent: 'executor', cls: 'agent-executor', msg: 'Price dropped to <span class="val-red">$0.0000402</span> — trailing triggered' },
+  { agent: 'executor', cls: 'agent-executor', msg: 'Exit executed: <span class="val-green">+117% profit</span> · <span class="val-green">0.0218 SOL received</span>' },
+  { agent: 'analyzer', cls: 'agent-analyzer', msg: 'Scanning next opportunity... <span class="highlight">$WIF</span> showing momentum' },
+];
+
+let lineIdx = 0;
+const output = document.getElementById('stream-output');
+
+function addLine() {
+  const l = streamLines[lineIdx % streamLines.length];
+  lineIdx++;
+
+  const div = document.createElement('div');
+  div.className = 'stream-line';
+  div.style.animationDelay = '0s';
+
+  div.innerHTML = `
+    <span class="stream-agent ${l.cls}">[${l.agent}]</span>
+    <span class="stream-msg">${l.msg}</span>
+  `;
+
+  output.appendChild(div);
+
+  // Keep only last 12 lines visible
+  while (output.children.length > 13) {
+    output.removeChild(output.firstChild);
+  }
+
+  // Add cursor on last line
+  const existing = output.querySelector('.stream-cursor');
+  if (existing) existing.remove();
+
+  const cursor = document.createElement('span');
+  cursor.className = 'stream-cursor';
+  output.appendChild(cursor);
+
+  output.scrollTop = output.scrollHeight;
+}
+
+// Start stream after a short delay, then loop
+setTimeout(() => {
+  addLine();
+  setInterval(addLine, 2200);
+}, 800);
+
+// ── COUNTER ANIMATION ───────────────────────────────────────────
+function animateCounter(el, target, suffix = '', duration = 1500) {
+  let start = 0;
+  const increment = target / (duration / 16);
+  const timer = setInterval(() => {
+    start += increment;
+    if (start >= target) {
+      el.textContent = target + suffix;
+      clearInterval(timer);
+    } else {
+      el.textContent = Math.floor(start) + suffix;
+    }
+  }, 16);
+}
+
+const countersObserver = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      animateCounter(document.getElementById('count-modules'), 5, '+');
+      animateCounter(document.getElementById('count-signals'), 6);
+      animateCounter(document.getElementById('count-banks'), 200, '+');
+      animateCounter(document.getElementById('count-zero'), 0);
+      countersObserver.disconnect();
+    }
+  });
+}, { threshold: 0.3 });
+
+const proofSection = document.getElementById('proof');
+if (proofSection) countersObserver.observe(proofSection);
+
+// ── LIVE RATE SIMULATION ────────────────────────────────────────
+const rateEl = document.getElementById('live-rate');
+if (rateEl) {
+  setInterval(() => {
+    const base = 1648;
+    const jitter = Math.floor(Math.random() * 8) - 4;
+    rateEl.textContent = `₦${(base + jitter).toLocaleString()} / $1`;
+  }, 4000);
+}
+
+// ── SMOOTH SCROLL ───────────────────────────────────────────────
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', e => {
+    const target = document.querySelector(a.getAttribute('href'));
+    if (target) {
+      e.preventDefault();
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  });
+});
+</script>
+
+</body>
+</html>
