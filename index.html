@@ -1114,6 +1114,7 @@ footer {
   font-size: 11px; color: var(--text-faint);
 }
 
+/* --------- LIVE STATS CSS ------------*/
 /* ── SCROLL ANIMATIONS ────────────────────────────────────── */
 .reveal {
   opacity: 0; transform: translateY(30px);
@@ -1145,6 +1146,100 @@ footer {
   .phone-lg { transform: none; }
   #agent-stream { padding: 60px 24px; }
 }
+
+.stat-pulse-dot {
+    --dot-color: #00C864;
+    position: relative; display: inline-flex;
+    width: 8px; height: 8px;
+}
+.stat-pulse-dot::before {
+    content: ''; position: absolute; inset: 0;
+    border-radius: 50%; background: var(--dot-color);
+    animation: statPulse 1.6s ease-in-out infinite;
+    opacity: 0.5;
+}
+.stat-pulse-dot::after {
+    content: ''; position: absolute; inset: 1px;
+    border-radius: 50%; background: var(--dot-color);
+}
+@keyframes statPulse {
+    0%, 100% { transform: scale(1); opacity: 0.5; }
+    50%       { transform: scale(2); opacity: 0; }
+}
+ 
+.stat-hero-card {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 12px;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.25s, border-color 0.25s;
+}
+.stat-hero-card:hover { transform: translateY(-2px); }
+.stat-hero-card::before {
+    content: ''; position: absolute;
+    top: 0; left: 0; right: 0; height: 2px;
+    background: var(--accent, #00FF88);
+    opacity: 0.6;
+}
+.stat-label {
+    font-family: var(--font-mono);
+    font-size: 10px; color: rgba(255,255,255,0.35);
+    letter-spacing: 0.08em; text-transform: uppercase;
+    margin-bottom: 8px;
+}
+.stat-value {
+    font-family: var(--font-mono);
+    font-size: 28px; font-weight: 600; color: #fff;
+    margin-bottom: 4px; letter-spacing: -0.02em;
+}
+.stat-sub {
+    font-size: 11px; color: rgba(255,255,255,0.25);
+}
+ 
+.stat-module-card {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 12px; overflow: hidden;
+    transition: border-color 0.25s;
+}
+.stat-module-card:hover { border-color: rgba(255,255,255,0.12); }
+.stat-mod-header {
+    display: flex; align-items: center; gap: 8px;
+    padding: 10px 14px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    background: color-mix(in srgb, var(--accent) 8%, transparent);
+}
+.stat-mod-title {
+    font-size: 13px; font-weight: 600; color: #fff; flex: 1;
+}
+.stat-mod-badge {
+    font-family: var(--font-mono);
+    font-size: 9px; font-weight: 700;
+    padding: 2px 8px; border-radius: 100px;
+    background: color-mix(in srgb, var(--accent) 20%, transparent);
+    color: var(--accent);
+}
+.stat-mod-body { padding: 10px 14px; display: flex; flex-direction: column; gap: 8px; }
+.stat-mod-row { display: flex; justify-content: space-between; align-items: center; }
+.stat-mod-lbl { font-size: 11px; color: rgba(255,255,255,0.3); }
+.stat-mod-val { font-size: 13px; font-weight: 600; color: #e2e8f0; font-family: var(--font-mono); }
+.stat-mod-val.highlight { color: var(--accent); }
+ 
+@media (max-width: 900px) {
+    #live-stats { padding: 60px 24px; }
+    .stat-hero-card { padding: 14px; }
+    .stat-value { font-size: 22px; }
+    /* hero cards — 2 col on mobile */
+    div[style*="grid-template-columns: repeat(4, 1fr)"] {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+    /* module grid — 1 col on mobile */
+    div[style*="grid-template-columns: repeat(3, 1fr)"] {
+        grid-template-columns: 1fr !important;
+    }
+}
 </style>
 </head>
 
@@ -1153,7 +1248,7 @@ footer {
 <!-- ── NAVIGATION ──────────────────────────────────────────── -->
 <nav id="navbar">
   <a href="#" class="nav-logo">
-    <img src="/Clickbot-logo.png" alt="ClickBot" class="nav-logo-img">
+    <img src="/clickbotlogo.png" alt="ClickBot" class="nav-logo-img">
     <span class="nav-logo-text">Click<span>Bot</span></span>
   </a>
   <ul class="nav-links">
@@ -1302,6 +1397,167 @@ footer {
     <div class="ticker-item"><span class="ticker-symbol">MEME/SOL</span><span class="ticker-price">$0.0312</span><span class="ticker-change up">+28.4%</span></div>
   </div>
 </div>
+
+
+<!-- ── LIVE STATS ─────────────────────────────────────────────── -->
+<section id="live-stats" style="padding: 80px 48px; background: rgba(13,13,16,0.8); border-top: 1px solid rgba(255,255,255,0.06);">
+    <div style="max-width: 1200px; margin: 0 auto;">
+ 
+        <!-- Header -->
+        <div style="text-align: center; margin-bottom: 56px;">
+            <div style="display: inline-flex; align-items: center; gap: 8px; margin-bottom: 16px;">
+                <span class="stat-pulse-dot"></span>
+                <span style="font-family: var(--font-mono); font-size: 11px; color: #00C864; letter-spacing: 0.1em; text-transform: uppercase;">Live Platform Metrics</span>
+            </div>
+            <h2 style="font-family: var(--font-display); font-size: clamp(28px,4vw,48px); font-weight: 700; line-height: 1.1; letter-spacing: -0.02em; margin-bottom: 16px;">
+                Built in the open.<br>
+                <em style="font-style: italic; color: #00FF88;">Proven by numbers.</em>
+            </h2>
+            <p style="font-size: 15px; color: rgba(255,255,255,0.4); max-width: 480px; margin: 0 auto; line-height: 1.7;">
+                Real volume. Real traders. Real exits. Every number is pulled live from ClickBot's on-chain activity.
+            </p>
+        </div>
+ 
+        <!-- Hero counters -->
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px;">
+            <div class="stat-hero-card" data-stat="users" data-accent="#00FF88">
+                <div class="stat-label">Total Traders</div>
+                <div class="stat-value" id="stat-users">—</div>
+                <div class="stat-sub" id="stat-users-sub">Loading…</div>
+            </div>
+            <div class="stat-hero-card" data-stat="active" data-accent="#00D4FF">
+                <div class="stat-label">Active (7 days)</div>
+                <div class="stat-value" id="stat-active">—</div>
+                <div class="stat-sub" id="stat-active-sub">&nbsp;</div>
+            </div>
+            <div class="stat-hero-card" data-stat="volume" data-accent="#A78BFA">
+                <div class="stat-label">Volume Facilitated</div>
+                <div class="stat-value" id="stat-volume">—</div>
+                <div class="stat-sub">All time · all modules</div>
+            </div>
+            <div class="stat-hero-card" data-stat="txs" data-accent="#FB923C">
+                <div class="stat-label">Transactions</div>
+                <div class="stat-value" id="stat-txs">—</div>
+                <div class="stat-sub">Spot · Fiat · Sniper · Perps</div>
+            </div>
+        </div>
+ 
+        <!-- NGN strip -->
+        <div id="ngn-strip" style="
+            border-radius: 12px; padding: 16px 20px;
+            border: 1px solid rgba(0,200,100,0.2);
+            background: rgba(0,200,100,0.04);
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 20px;
+            flex-wrap: wrap; gap: 12px;
+        ">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <span style="font-size: 20px;">🏦</span>
+                <div>
+                    <div style="font-size: 14px; font-weight: 600; color: #fff;">
+                        <span id="stat-ngn">₦—</span> moved through the NGN Bridge
+                    </div>
+                    <div style="font-size: 12px; color: rgba(255,255,255,0.3); margin-top: 2px;">
+                        <span id="stat-fiat-txs">—</span> fiat transactions · <span id="stat-success-rate">—</span> success rate
+                    </div>
+                </div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <span class="stat-pulse-dot" style="--dot-color: #4ade80;"></span>
+                <span style="font-size: 12px; color: #4ade80; font-weight: 600;">Nigeria → Bank in minutes</span>
+            </div>
+        </div>
+ 
+        <!-- Module grid -->
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px;">
+ 
+            <div class="stat-module-card">
+                <div class="stat-mod-header" style="--accent: #4ade80;">
+                    <span style="font-size: 14px;">📊</span>
+                    <span class="stat-mod-title">Spot Trading</span>
+                    <span class="stat-mod-badge" style="--accent: #4ade80;" id="mod-spot-badge">—</span>
+                </div>
+                <div class="stat-mod-body">
+                    <div class="stat-mod-row"><span class="stat-mod-lbl">Total trades</span><span class="stat-mod-val highlight" style="--accent: #4ade80;" id="mod-trades">—</span></div>
+                    <div class="stat-mod-row"><span class="stat-mod-lbl">Volume all-time</span><span class="stat-mod-val" id="mod-volume">—</span></div>
+                    <div class="stat-mod-row"><span class="stat-mod-lbl">Unique traders</span><span class="stat-mod-val" id="mod-traders">—</span></div>
+                </div>
+            </div>
+ 
+            <div class="stat-module-card">
+                <div class="stat-mod-header" style="--accent: #fbbf24;">
+                    <span style="font-size: 14px;">🎯</span>
+                    <span class="stat-mod-title">Sniper</span>
+                    <span class="stat-mod-badge" style="--accent: #fbbf24;" id="mod-sniper-badge">—</span>
+                </div>
+                <div class="stat-mod-body">
+                    <div class="stat-mod-row"><span class="stat-mod-lbl">Total snipes</span><span class="stat-mod-val highlight" style="--accent: #fbbf24;" id="mod-snipes">—</span></div>
+                    <div class="stat-mod-row"><span class="stat-mod-lbl">This week</span><span class="stat-mod-val" id="mod-snipes-7d">—</span></div>
+                    <div class="stat-mod-row"><span class="stat-mod-lbl">Execution</span><span class="stat-mod-val">Jito · &lt;100ms</span></div>
+                </div>
+            </div>
+ 
+            <div class="stat-module-card">
+                <div class="stat-mod-header" style="--accent: #a78bfa;">
+                    <span style="font-size: 14px;">🔄</span>
+                    <span class="stat-mod-title">Copy Trading</span>
+                    <span class="stat-mod-badge" style="--accent: #a78bfa;" id="mod-copy-badge">—</span>
+                </div>
+                <div class="stat-mod-body">
+                    <div class="stat-mod-row"><span class="stat-mod-lbl">Trades copied</span><span class="stat-mod-val highlight" style="--accent: #a78bfa;" id="mod-copied">—</span></div>
+                    <div class="stat-mod-row"><span class="stat-mod-lbl">Success rate</span><span class="stat-mod-val" id="mod-copy-rate">—</span></div>
+                    <div class="stat-mod-row"><span class="stat-mod-lbl">Active sessions</span><span class="stat-mod-val" id="mod-copy-sessions">—</span></div>
+                </div>
+            </div>
+ 
+            <div class="stat-module-card">
+                <div class="stat-mod-header" style="--accent: #38bdf8;">
+                    <span style="font-size: 14px;">📈</span>
+                    <span class="stat-mod-title">Perps (Drift)</span>
+                    <span class="stat-mod-badge" style="--accent: #38bdf8;" id="mod-perps-badge">—</span>
+                </div>
+                <div class="stat-mod-body">
+                    <div class="stat-mod-row"><span class="stat-mod-lbl">Total positions</span><span class="stat-mod-val highlight" style="--accent: #38bdf8;" id="mod-positions">—</span></div>
+                    <div class="stat-mod-row"><span class="stat-mod-lbl">Open now</span><span class="stat-mod-val" id="mod-open">—</span></div>
+                    <div class="stat-mod-row"><span class="stat-mod-lbl">Win rate</span><span class="stat-mod-val" id="mod-winrate">—</span></div>
+                </div>
+            </div>
+ 
+            <div class="stat-module-card">
+                <div class="stat-mod-header" style="--accent: #22d3ee;">
+                    <span style="font-size: 14px;">👥</span>
+                    <span class="stat-mod-title">Community</span>
+                </div>
+                <div class="stat-mod-body">
+                    <div class="stat-mod-row"><span class="stat-mod-lbl">Total wallets</span><span class="stat-mod-val highlight" style="--accent: #22d3ee;" id="mod-wallets">—</span></div>
+                    <div class="stat-mod-row"><span class="stat-mod-lbl">KYC verified</span><span class="stat-mod-val" id="mod-kyc">—</span></div>
+                    <div class="stat-mod-row"><span class="stat-mod-lbl">Joined last 30d</span><span class="stat-mod-val" id="mod-new30">—</span></div>
+                </div>
+            </div>
+ 
+            <div class="stat-module-card">
+                <div class="stat-mod-header" style="--accent: #f472b6;">
+                    <span style="font-size: 14px;">🎁</span>
+                    <span class="stat-mod-title">Referrals</span>
+                    <span class="stat-mod-badge" style="--accent: #f472b6;">20% forever</span>
+                </div>
+                <div class="stat-mod-body">
+                    <div class="stat-mod-row"><span class="stat-mod-lbl">Users referred</span><span class="stat-mod-val highlight" style="--accent: #f472b6;" id="mod-referred">—</span></div>
+                    <div class="stat-mod-row"><span class="stat-mod-lbl">Active referrers</span><span class="stat-mod-val" id="mod-referrers">—</span></div>
+                    <div class="stat-mod-row"><span class="stat-mod-lbl">Commission</span><span class="stat-mod-val">Instant · No cap</span></div>
+                </div>
+            </div>
+ 
+        </div>
+ 
+        <!-- Footer note -->
+        <p style="text-align: center; font-family: var(--font-mono); font-size: 11px; color: rgba(255,255,255,0.15); margin-top: 12px;">
+            Stats refresh every 60s · Live on Solana mainnet
+            <span id="stats-updated"></span>
+        </p>
+    </div>
+</section>
+
 
 <!-- ── AGENT STREAM ─────────────────────────────────────────── -->
 <section id="agent-stream">
@@ -1927,6 +2183,104 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
     }
   });
 });
+
+// ── STATS FETCHER ──────────────────────────────────────────────────
+const STATS_API = 'https://api.clickshift.io'; // ← update this
+ 
+function fmtK(n) {
+    n = parseFloat(n) || 0;
+    if (n >= 1_000_000) return (n/1_000_000).toFixed(2) + 'M';
+    if (n >= 1_000)     return (n/1_000).toFixed(1) + 'K';
+    return n.toLocaleString();
+}
+function fmtUSD(n) {
+    n = parseFloat(n) || 0;
+    if (n >= 1_000_000) return '$' + (n/1_000_000).toFixed(2) + 'M';
+    if (n >= 1_000)     return '$' + (n/1_000).toFixed(1) + 'K';
+    return '$' + n.toFixed(0);
+}
+function fmtNGN(n) {
+    n = parseFloat(n) || 0;
+    if (n >= 1_000_000_000) return '₦' + (n/1_000_000_000).toFixed(2) + 'B';
+    if (n >= 1_000_000)     return '₦' + (n/1_000_000).toFixed(1) + 'M';
+    if (n >= 1_000)         return '₦' + (n/1_000).toFixed(1) + 'K';
+    return '₦' + n.toFixed(0);
+}
+function setText(id, val) {
+    const el = document.getElementById(id);
+    if (el) el.textContent = val;
+}
+ 
+async function loadStats() {
+    try {
+        // Fetch both in parallel
+        const [liveRes, summaryRes] = await Promise.all([
+            fetch(STATS_API + '/api/stats/live'),
+            fetch(STATS_API + '/api/stats/summary'),
+        ]);
+        const live    = await liveRes.json();
+        const summary = await summaryRes.json();
+ 
+        // Hero cards
+        setText('stat-users',      fmtK(live.users));
+        setText('stat-users-sub',  `+${summary.users?.new_7d || 0} this week`);
+        setText('stat-active',     fmtK(live.active_7d));
+        setText('stat-volume',     fmtUSD(live.volume_usd));
+        setText('stat-txs',        fmtK(live.transactions));
+ 
+        // NGN strip
+        setText('stat-ngn',         fmtNGN(live.ngn_volume));
+        setText('stat-fiat-txs',    (summary.fiat?.transactions || 0).toLocaleString());
+        setText('stat-success-rate',`${summary.fiat?.success_rate_pct || 0}% success`);
+ 
+        // Spot
+        setText('mod-spot-badge',  `${(summary.trading?.trades_7d || 0).toLocaleString()} this week`);
+        setText('mod-trades',      fmtK(summary.trading?.total_trades));
+        setText('mod-volume',      fmtUSD(summary.trading?.volume_usd));
+        setText('mod-traders',     fmtK(summary.trading?.unique_traders));
+ 
+        // Sniper
+        setText('mod-sniper-badge',`${summary.sniper?.fill_rate_pct || 0}% fill rate`);
+        setText('mod-snipes',      fmtK(summary.sniper?.total_snipes));
+        setText('mod-snipes-7d',   (summary.sniper?.snipes_7d || 0).toLocaleString());
+ 
+        // Copy
+        setText('mod-copy-badge',  `${summary.copy_trading?.active_sessions || 0} active`);
+        setText('mod-copied',      fmtK(summary.copy_trading?.total_copied_trades));
+        setText('mod-copy-rate',   `${summary.copy_trading?.success_rate_pct || 0}%`);
+        setText('mod-copy-sessions',summary.copy_trading?.active_sessions || 0);
+ 
+        // Perps
+        setText('mod-perps-badge', `${summary.perps?.open_now || 0} open`);
+        setText('mod-positions',   fmtK(summary.perps?.total_positions));
+        setText('mod-open',        summary.perps?.open_now || 0);
+        setText('mod-winrate',     `${summary.perps?.win_rate_pct || 0}%`);
+ 
+        // Community
+        setText('mod-wallets',     fmtK(summary.users?.total));
+        setText('mod-kyc',         (summary.users?.kyc_verified || 0).toLocaleString());
+        setText('mod-new30',       (summary.users?.new_30d || 0).toLocaleString());
+ 
+        // Referrals
+        setText('mod-referred',    fmtK(summary.referrals?.total_referred));
+        setText('mod-referrers',   (summary.referrals?.active_referrers || 0).toLocaleString());
+ 
+        // Timestamp
+        const updated = document.getElementById('stats-updated');
+        if (updated && live.generated_at) {
+            const secs = Math.floor((Date.now() - live.generated_at) / 1000);
+            updated.textContent = ` · Updated ${secs < 60 ? secs + 's' : Math.floor(secs/60) + 'm'} ago`;
+        }
+ 
+    } catch (e) {
+        console.warn('[Stats] API unavailable — showing cached values', e.message);
+    }
+}
+ 
+// Load on page ready and refresh every 90s
+loadStats();
+setInterval(loadStats, 90_000);
+
 </script>
 
 </body>
