@@ -2002,6 +2002,70 @@ footer {
   </div>
 </section>
 
+
+<!-- ── REFERRAL LEADERBOARD SECTION ────────────────────────────── -->
+<section id="leaderboard" style="padding: 80px 48px; background: rgba(7,7,16,0.95);">
+<div style="max-width: 760px; margin: 0 auto;">
+ 
+  <div style="text-align:center; margin-bottom:48px;">
+    <div style="font-family:var(--font-mono); font-size:11px; color:rgba(255,215,0,0.6); letter-spacing:0.1em; text-transform:uppercase; margin-bottom:12px;">
+      Referral Program
+    </div>
+    <h2 style="font-family:var(--font-display); font-size:clamp(28px,4vw,44px); font-weight:700; line-height:1.1; margin-bottom:12px;">
+      The <em style="font-style:italic; color:#FFD700;">Champions Hall</em>
+    </h2>
+    <p style="font-size:14px; color:rgba(255,255,255,0.4); max-width:440px; margin:0 auto; line-height:1.7;">
+      Share your link. Earn 20% of every fee your referrals generate — instantly, forever, no cap.
+    </p>
+  </div>
+ 
+  <!-- Program stats -->
+  <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:24px;" id="lb-stats-grid">
+    <div class="lb-stat-card">
+      <div class="lb-stat-val" id="lb-total-paid">—</div>
+      <div class="lb-stat-lbl">Total Paid Out</div>
+    </div>
+    <div class="lb-stat-card">
+      <div class="lb-stat-val" id="lb-referrers">—</div>
+      <div class="lb-stat-lbl">Referrers</div>
+    </div>
+    <div class="lb-stat-card">
+      <div class="lb-stat-val" id="lb-referred">—</div>
+      <div class="lb-stat-lbl">Users Referred</div>
+    </div>
+    <div class="lb-stat-card">
+      <div class="lb-stat-val" id="lb-7d">—</div>
+      <div class="lb-stat-lbl">Paid This Week</div>
+    </div>
+  </div>
+ 
+  <!-- Period tabs -->
+  <div style="display:flex; gap:6px; margin-bottom:16px;">
+    <button class="lb-tab active" onclick="loadLeaderboard('all')" id="tab-all">All Time</button>
+    <button class="lb-tab" onclick="loadLeaderboard('30d')" id="tab-30d">30 Days</button>
+    <button class="lb-tab" onclick="loadLeaderboard('7d')" id="tab-7d">7 Days</button>
+  </div>
+ 
+  <!-- Leaderboard entries -->
+  <div id="lb-entries" style="display:flex; flex-direction:column; gap:8px;"></div>
+ 
+  <!-- CTA -->
+  <div style="text-align:center; margin-top:32px;">
+    <a href="https://t.me/clicksolbot" target="_blank"
+       style="display:inline-flex; align-items:center; gap:8px; padding:14px 28px;
+              background:linear-gradient(135deg,#FFD700,#FFA500);
+              color:#000; font-weight:700; border-radius:10px; font-size:14px;
+              text-decoration:none; transition:transform 0.2s;"
+       onmouseover="this.style.transform='scale(1.04)'"
+       onmouseout="this.style.transform='scale(1)'">
+      🏆 Claim Your Spot on the Leaderboard
+    </a>
+  </div>
+ 
+</div>
+</section>
+
+
 <!-- ── SCREENS SHOWCASE ──────────────────────────────────────── -->
 <section id="screens">
   <div class="section-inner">
@@ -2186,69 +2250,6 @@ footer {
   </div>
 </section>
 
-
-
-<!-- ── REFERRAL LEADERBOARD SECTION ────────────────────────────── -->
-<section id="leaderboard" style="padding: 80px 48px; background: rgba(7,7,16,0.95);">
-<div style="max-width: 760px; margin: 0 auto;">
- 
-  <div style="text-align:center; margin-bottom:48px;">
-    <div style="font-family:var(--font-mono); font-size:11px; color:rgba(255,215,0,0.6); letter-spacing:0.1em; text-transform:uppercase; margin-bottom:12px;">
-      Referral Program
-    </div>
-    <h2 style="font-family:var(--font-display); font-size:clamp(28px,4vw,44px); font-weight:700; line-height:1.1; margin-bottom:12px;">
-      The <em style="font-style:italic; color:#FFD700;">Champions Hall</em>
-    </h2>
-    <p style="font-size:14px; color:rgba(255,255,255,0.4); max-width:440px; margin:0 auto; line-height:1.7;">
-      Share your link. Earn 20% of every fee your referrals generate — instantly, forever, no cap.
-    </p>
-  </div>
- 
-  <!-- Program stats -->
-  <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:24px;" id="lb-stats-grid">
-    <div class="lb-stat-card">
-      <div class="lb-stat-val" id="lb-total-paid">—</div>
-      <div class="lb-stat-lbl">Total Paid Out</div>
-    </div>
-    <div class="lb-stat-card">
-      <div class="lb-stat-val" id="lb-referrers">—</div>
-      <div class="lb-stat-lbl">Referrers</div>
-    </div>
-    <div class="lb-stat-card">
-      <div class="lb-stat-val" id="lb-referred">—</div>
-      <div class="lb-stat-lbl">Users Referred</div>
-    </div>
-    <div class="lb-stat-card">
-      <div class="lb-stat-val" id="lb-7d">—</div>
-      <div class="lb-stat-lbl">Paid This Week</div>
-    </div>
-  </div>
- 
-  <!-- Period tabs -->
-  <div style="display:flex; gap:6px; margin-bottom:16px;">
-    <button class="lb-tab active" onclick="loadLeaderboard('all')" id="tab-all">All Time</button>
-    <button class="lb-tab" onclick="loadLeaderboard('30d')" id="tab-30d">30 Days</button>
-    <button class="lb-tab" onclick="loadLeaderboard('7d')" id="tab-7d">7 Days</button>
-  </div>
- 
-  <!-- Leaderboard entries -->
-  <div id="lb-entries" style="display:flex; flex-direction:column; gap:8px;"></div>
- 
-  <!-- CTA -->
-  <div style="text-align:center; margin-top:32px;">
-    <a href="https://t.me/clicksolbot" target="_blank"
-       style="display:inline-flex; align-items:center; gap:8px; padding:14px 28px;
-              background:linear-gradient(135deg,#FFD700,#FFA500);
-              color:#000; font-weight:700; border-radius:10px; font-size:14px;
-              text-decoration:none; transition:transform 0.2s;"
-       onmouseover="this.style.transform='scale(1.04)'"
-       onmouseout="this.style.transform='scale(1)'">
-      🏆 Claim Your Spot on the Leaderboard
-    </a>
-  </div>
- 
-</div>
-</section>
 
 <!-- ── NGN BRIDGE ────────────────────────────────────────────── -->
 <section id="ngn">
