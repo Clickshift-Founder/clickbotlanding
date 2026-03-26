@@ -1273,6 +1273,266 @@ footer {
   #lb-stats-grid { grid-template-columns:repeat(2,1fr); }
 }
 
+/* ── Trending section ──────────────────────────────────────────── */
+#trending-section {
+    padding: 80px 48px;
+    background: rgba(7,7,16,0.95);
+    border-top: 1px solid rgba(255,255,255,0.06);
+    position: relative;
+    overflow: hidden;
+}
+#trending-section::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 50%; transform: translateX(-50%);
+    width: 600px; height: 300px;
+    background: radial-gradient(ellipse, rgba(0,200,100,0.06), transparent 70%);
+    pointer-events: none;
+}
+ 
+.trend-header { text-align: center; margin-bottom: 48px; }
+.trend-eyebrow {
+    font-family: var(--font-mono);
+    font-size: 11px; color: rgba(0,200,100,0.7);
+    letter-spacing: 0.12em; text-transform: uppercase;
+    display: flex; align-items: center; justify-content: center;
+    gap: 8px; margin-bottom: 14px;
+}
+.trend-live-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: #00C864;
+    box-shadow: 0 0 0 0 rgba(0,200,100,0.4);
+    animation: trendPulse 2s infinite;
+}
+@keyframes trendPulse {
+    0%   { box-shadow: 0 0 0 0 rgba(0,200,100,0.4); }
+    70%  { box-shadow: 0 0 0 8px rgba(0,200,100,0); }
+    100% { box-shadow: 0 0 0 0 rgba(0,200,100,0); }
+}
+ 
+.trend-title {
+    font-family: var(--font-display);
+    font-size: clamp(28px, 4vw, 46px);
+    font-weight: 700; line-height: 1.1;
+    margin-bottom: 14px;
+}
+.trend-sub {
+    font-size: 15px; color: rgba(255,255,255,0.4);
+    max-width: 520px; margin: 0 auto; line-height: 1.7;
+}
+ 
+/* ── Timeframe tabs ─────────────────────────────────────────────── */
+.trend-tabs {
+    display: flex; gap: 6px; margin-bottom: 20px;
+    justify-content: space-between; align-items: center;
+    flex-wrap: wrap;
+}
+.trend-tab {
+    padding: 6px 16px; border-radius: 8px;
+    font-family: var(--font-mono); font-size: 12px; font-weight: 600;
+    border: 1px solid rgba(255,255,255,0.08);
+    background: transparent; color: rgba(255,255,255,0.4);
+    cursor: pointer; transition: all 0.2s;
+}
+.trend-tab.active {
+    background: rgba(0,200,100,0.12);
+    border-color: rgba(0,200,100,0.3);
+    color: #00C864;
+}
+.trend-refresh {
+    font-size: 11px; color: rgba(255,255,255,0.2);
+    font-family: var(--font-mono);
+}
+ 
+/* ── Token grid ─────────────────────────────────────────────────── */
+#trend-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 24px;
+}
+ 
+/* ── Token card ─────────────────────────────────────────────────── */
+.trend-card {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 14px;
+    padding: 16px;
+    position: relative; overflow: hidden;
+    transition: border-color 0.25s, transform 0.2s;
+    cursor: pointer;
+    text-decoration: none; display: block;
+}
+.trend-card:hover {
+    border-color: rgba(0,200,100,0.25);
+    transform: translateY(-2px);
+}
+.trend-card::before {
+    content: ''; position: absolute;
+    top: 0; left: 0; right: 0; height: 2px;
+    opacity: 0;
+    transition: opacity 0.25s;
+}
+.trend-card:hover::before { opacity: 1; }
+.trend-card.src-boost::before  { background: #00C864; }
+.trend-card.src-profile::before{ background: #00D4FF; }
+.trend-card.src-trending::before{ background: #A78BFA; }
+ 
+/* Rank badge */
+.trend-rank {
+    position: absolute; top: 12px; right: 12px;
+    font-family: var(--font-mono); font-size: 11px;
+    font-weight: 700; color: rgba(255,255,255,0.2);
+}
+ 
+/* Token header */
+.trend-tok-header {
+    display: flex; align-items: center; gap: 10px; margin-bottom: 12px;
+}
+.trend-tok-img {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: rgba(255,255,255,0.08);
+    object-fit: cover; flex-shrink: 0;
+}
+.trend-tok-img-placeholder {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: linear-gradient(135deg, #1a1a2e, #16213e);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 700; color: #00C864;
+    flex-shrink: 0;
+}
+.trend-tok-name {
+    font-size: 15px; font-weight: 700; color: #fff;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    max-width: 120px;
+}
+.trend-tok-badges { display: flex; gap: 4px; margin-top: 2px; }
+.trend-badge {
+    font-size: 9px; font-weight: 700; padding: 1px 6px;
+    border-radius: 100px; letter-spacing: 0.04em;
+}
+.badge-pump { background: rgba(153,69,255,0.2); color: #9945FF; }
+.badge-boost{ background: rgba(0,200,100,0.15); color: #00C864; }
+.badge-new  { background: rgba(0,212,255,0.15); color: #00D4FF; }
+ 
+/* Score bar */
+.trend-score-bar {
+    height: 3px; border-radius: 2px;
+    background: rgba(255,255,255,0.06);
+    margin-bottom: 12px; overflow: hidden;
+}
+.trend-score-fill {
+    height: 100%; border-radius: 2px;
+    transition: width 0.8s ease;
+}
+ 
+/* Stats row */
+.trend-stats {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 8px; margin-bottom: 10px;
+}
+.trend-stat-item { }
+.trend-stat-label {
+    font-size: 9px; color: rgba(255,255,255,0.3);
+    text-transform: uppercase; letter-spacing: 0.06em;
+    margin-bottom: 2px;
+}
+.trend-stat-value {
+    font-family: var(--font-mono);
+    font-size: 13px; font-weight: 600; color: #fff;
+}
+.trend-stat-value.green { color: #00C864; }
+.trend-stat-value.red   { color: #FF4D6A; }
+ 
+/* Signals */
+.trend-signal {
+    font-size: 10px; color: rgba(255,255,255,0.35);
+    border-top: 1px solid rgba(255,255,255,0.05);
+    padding-top: 8px; margin-top: 4px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+ 
+/* CTA */
+.trend-card-cta {
+    display: block; margin-top: 10px;
+    padding: 8px 0; border-radius: 8px;
+    background: rgba(0,200,100,0.1);
+    border: 1px solid rgba(0,200,100,0.2);
+    color: #00C864; font-size: 12px; font-weight: 600;
+    text-align: center; text-decoration: none;
+    transition: background 0.2s;
+}
+.trend-card-cta:hover { background: rgba(0,200,100,0.2); }
+ 
+/* ── Alert subscription CTA ──────────────────────────────────────  */
+.trend-alert-cta {
+    background: linear-gradient(135deg,
+        rgba(0,200,100,0.08) 0%,
+        rgba(0,212,255,0.06) 100%
+    );
+    border: 1px solid rgba(0,200,100,0.2);
+    border-radius: 16px;
+    padding: 28px 32px;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 24px; flex-wrap: wrap;
+}
+.trend-alert-left h3 {
+    font-size: 18px; font-weight: 700; color: #fff; margin-bottom: 6px;
+}
+.trend-alert-left p {
+    font-size: 13px; color: rgba(255,255,255,0.4); line-height: 1.6;
+    max-width: 480px;
+}
+.trend-alert-btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 12px 24px; border-radius: 10px;
+    background: linear-gradient(135deg, #00C864, #00A851);
+    color: #000; font-size: 14px; font-weight: 700;
+    text-decoration: none; white-space: nowrap;
+    transition: transform 0.2s, box-shadow 0.2s;
+    flex-shrink: 0;
+}
+.trend-alert-btn:hover {
+    transform: scale(1.03);
+    box-shadow: 0 8px 24px rgba(0,200,100,0.3);
+}
+.trend-alert-price {
+    font-size: 11px; color: rgba(255,255,255,0.35);
+    text-align: center; margin-top: 8px;
+}
+ 
+/* ── Loading skeleton ────────────────────────────────────────────── */
+.trend-skeleton {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 14px; padding: 16px;
+    animation: trendShimmer 1.5s infinite;
+}
+@keyframes trendShimmer {
+    0%,100% { opacity: 0.4; }
+    50%      { opacity: 0.7; }
+}
+.skeleton-line {
+    height: 12px; border-radius: 6px;
+    background: rgba(255,255,255,0.06);
+    margin-bottom: 8px;
+}
+ 
+/* ── Footer ──────────────────────────────────────────────────────── */
+.trend-footer {
+    text-align: center; margin-top: 20px;
+    font-family: var(--font-mono); font-size: 11px;
+    color: rgba(255,255,255,0.15);
+}
+ 
+/* ── Responsive ──────────────────────────────────────────────────── */
+@media (max-width: 960px) { #trend-grid { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 600px) {
+    #trending-section { padding: 60px 24px; }
+    #trend-grid { grid-template-columns: 1fr; }
+    .trend-alert-cta { flex-direction: column; text-align: center; }
+}
+
 </style>
 </head>
 
@@ -1406,6 +1666,75 @@ footer {
       </div>
     </div>
   </div>
+</section>
+
+<!-- ── HTML — paste into index.html body ───────────────────────── -->
+<section id="trending-section">
+<div style="max-width:1200px;margin:0 auto;">
+ 
+    <!-- Header -->
+    <div class="trend-header">
+        <div class="trend-eyebrow">
+            <span class="trend-live-dot"></span>
+            Pre-Pump Intelligence · Updated every 4 minutes
+        </div>
+        <h2 class="trend-title">
+            Spot Tokens <em style="color:#00C864;font-style:italic">Before</em> They Pump
+        </h2>
+        <p class="trend-sub">
+            Phantom shows you what already pumped. ClickBot shows you what's
+            about to. Our algorithm catches tokens at $50K–$600K MC — before
+            they show up on anyone's trending list.
+        </p>
+    </div>
+ 
+    <!-- Tabs + refresh -->
+    <div class="trend-tabs">
+        <div style="display:flex;gap:6px;">
+            <button class="trend-tab active" onclick="setTrendFilter('boost')">⚡ Boost Signals</button>
+            <button class="trend-tab" onclick="setTrendFilter('all')">🔥 All Picks</button>
+            <button class="trend-tab" onclick="setTrendFilter('new')">🆕 Fresh Launches</button>
+        </div>
+        <span class="trend-refresh" id="trend-refresh-label">Loading...</span>
+    </div>
+ 
+    <!-- Token grid -->
+    <div id="trend-grid">
+        <!-- Skeletons while loading -->
+        <div class="trend-skeleton"><div class="skeleton-line" style="width:60%"></div><div class="skeleton-line" style="width:40%"></div><div class="skeleton-line" style="width:80%"></div></div>
+        <div class="trend-skeleton"><div class="skeleton-line" style="width:50%"></div><div class="skeleton-line" style="width:70%"></div><div class="skeleton-line" style="width:45%"></div></div>
+        <div class="trend-skeleton"><div class="skeleton-line" style="width:65%"></div><div class="skeleton-line" style="width:35%"></div><div class="skeleton-line" style="width:75%"></div></div>
+    </div>
+ 
+    <!-- Alert subscription CTA -->
+    <div class="trend-alert-cta">
+        <div class="trend-alert-left">
+            <h3>🔔 Get Notified Before They Pump</h3>
+            <p>
+                Our algorithm spots the signal first. Subscribe to ClickBot Alpha Alerts
+                and get a Telegram notification the moment a token crosses our threshold
+                — before it hits 50% gain. Never be late again.
+            </p>
+            <div style="display:flex;gap:16px;margin-top:12px;font-size:12px;color:rgba(255,255,255,0.3);">
+                <span>✅ Instant Telegram notification</span>
+                <span>✅ Contract address + score + entry signal</span>
+                <span>✅ 30 days access</span>
+            </div>
+        </div>
+        <div style="text-align:center;flex-shrink:0;">
+            <a href="https://t.me/clicksolbot?start=alerts" target="_blank" class="trend-alert-btn">
+                🔔 Subscribe to Alerts
+            </a>
+            <div class="trend-alert-price">$25 USDC / month · Cancel anytime</div>
+        </div>
+    </div>
+ 
+    <div class="trend-footer">
+        Data refreshes every 4 minutes · Powered by ClickBot on Solana mainnet ·
+        <a href="https://t.me/clicksolbot" style="color:rgba(0,200,100,0.6)">t.me/clicksolbot</a>
+    </div>
+ 
+</div>
 </section>
 
 <!-- ── TICKER ───────────────────────────────────────────────── -->
@@ -2438,8 +2767,144 @@ async function loadLeaderboard(period) {
  
 // Load on page ready
 loadLeaderboard('all');
-</script>
 
+
+// <!-- ── JavaScript — ON THE Trending token launnnnch Board ─── -->
+let _trendPicks   = [];
+let _trendFilter  = 'boost';
+let _trendTimer   = null;
+ 
+// ── Fetch picks from your bot server ───────────────────────────
+async function loadTrendingPicks() {
+    try {
+        const res   = await fetch(STATS_API + '/api/picks/public', { signal: AbortSignal.timeout(12000) });
+        const data  = await res.json();
+        _trendPicks = data.picks || [];
+    } catch (e) {
+        // Fallback: direct DexScreener boosts as proof of concept
+        try {
+            const r   = await fetch('https://api.dexscreener.com/token-boosts/top/v1');
+            const arr = await r.json();
+            _trendPicks = (arr || [])
+                .filter(t => t.chainId === 'solana')
+                .slice(0, 6)
+                .map((t, i) => ({
+                    mint:      t.tokenAddress,
+                    symbol:    t.tokenAddress?.slice(0,5).toUpperCase() || '???',
+                    name:      'Loading...',
+                    score:     70 - i * 3,
+                    change1h:  0, change6h: 0,
+                    mc:        0, buys: 0, sells: 0,
+                    buyRatio:  50, ageHours: 0,
+                    isPump:    t.tokenAddress?.endsWith('pump') || false,
+                    source:    'boost',
+                    signals:   ['⚡ Active boost signal — team marketing now'],
+                    pairUrl:   t.url || `https://dexscreener.com/solana/${t.tokenAddress}`,
+                    imageUrl:  null,
+                }));
+        } catch (_) {}
+    }
+    renderTrendGrid();
+}
+ 
+// ── Render the grid ─────────────────────────────────────────────
+function renderTrendGrid() {
+    const grid = document.getElementById('trend-grid');
+    if (!grid) return;
+ 
+    const filtered = _trendFilter === 'boost'
+        ? _trendPicks.filter(p => p.source === 'boost')
+        : _trendFilter === 'new'
+        ? _trendPicks.filter(p => p.ageHours < 6)
+        : _trendPicks;
+ 
+    const show = filtered.length ? filtered : _trendPicks;
+    if (!show.length) {
+        grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:rgba(255,255,255,0.3);font-size:14px;">Scanning market... check back in 30 seconds.</div>';
+        return;
+    }
+ 
+    const fmtMC = mc => {
+        if (!mc) return '—';
+        if (mc >= 1_000_000) return '$' + (mc/1_000_000).toFixed(2) + 'M';
+        return '$' + (mc/1000).toFixed(0) + 'K';
+    };
+    const fmtAge = h => {
+        if (!h) return '—';
+        return h < 1 ? Math.round(h*60) + 'm old' : h.toFixed(1) + 'h old';
+    };
+    const scoreColor = s => s >= 70 ? '#00C864' : s >= 50 ? '#FFD700' : '#FF9F43';
+ 
+    grid.innerHTML = show.slice(0, 6).map((p, i) => {
+        const chg1h = parseFloat(p.change1h || 0);
+        const chgClass = chg1h >= 0 ? 'green' : 'red';
+        const chgStr  = (chg1h >= 0 ? '+' : '') + chg1h.toFixed(1) + '%';
+        const srcClass = { boost: 'src-boost', profile: 'src-profile', trending: 'src-trending' }[p.source] || '';
+        const imgEl = p.imageUrl
+            ? `<img src="${p.imageUrl}" class="trend-tok-img" onerror="this.style.display='none'">`
+            : `<div class="trend-tok-img-placeholder">${(p.symbol||'?').charAt(0)}</div>`;
+        const sig = (p.signals||[])[0] || 'Signal detected';
+        const tgUrl = `https://t.me/clicksolbot?start=buy_${p.mint}`;
+ 
+        return `
+        <div class="trend-card ${srcClass}" onclick="window.open('${tgUrl}','_blank')">
+            <div class="trend-rank">#${i+1}</div>
+            <div class="trend-tok-header">
+                ${imgEl}
+                <div style="min-width:0">
+                    <div class="trend-tok-name">${p.symbol || '???'}</div>
+                    <div class="trend-tok-badges">
+                        ${p.isPump    ? '<span class="trend-badge badge-pump">pump.fun</span>' : ''}
+                        ${p.source==='boost'   ? '<span class="trend-badge badge-boost">boosted</span>' : ''}
+                        ${p.source==='profile' ? '<span class="trend-badge badge-new">new</span>' : ''}
+                    </div>
+                </div>
+            </div>
+            <div class="trend-score-bar">
+                <div class="trend-score-fill" style="width:${p.score||0}%;background:${scoreColor(p.score||0)}"></div>
+            </div>
+            <div class="trend-stats">
+                <div class="trend-stat-item">
+                    <div class="trend-stat-label">Score</div>
+                    <div class="trend-stat-value" style="color:${scoreColor(p.score||0)}">${p.score||0}/100</div>
+                </div>
+                <div class="trend-stat-item">
+                    <div class="trend-stat-label">1h Change</div>
+                    <div class="trend-stat-value ${chgClass}">${chgStr}</div>
+                </div>
+                <div class="trend-stat-item">
+                    <div class="trend-stat-label">Market Cap</div>
+                    <div class="trend-stat-value">${fmtMC(p.mc)}</div>
+                </div>
+                <div class="trend-stat-item">
+                    <div class="trend-stat-label">Age</div>
+                    <div class="trend-stat-value">${fmtAge(p.ageHours)}</div>
+                </div>
+            </div>
+            <div class="trend-signal">💡 ${sig}</div>
+            <a href="${tgUrl}" target="_blank" class="trend-card-cta" onclick="event.stopPropagation()">
+                Trade in ClickBot →
+            </a>
+        </div>`;
+    }).join('');
+ 
+    // Update refresh label
+    const lbl = document.getElementById('trend-refresh-label');
+    if (lbl) lbl.textContent = 'Updated ' + new Date().toLocaleTimeString();
+}
+ 
+// ── Tab filter ──────────────────────────────────────────────────
+function setTrendFilter(f) {
+    _trendFilter = f;
+    document.querySelectorAll('.trend-tab').forEach(t => t.classList.remove('active'));
+    event?.target?.classList.add('active');
+    renderTrendGrid();
+}
+ 
+// ── Boot ────────────────────────────────────────────────────────
+loadTrendingPicks();
+clearInterval(_trendTimer);
+_trendTimer = setInterval(loadTrendingPicks, 4 * 60 * 1000); // refresh every 4 min
 
 </script>
 
