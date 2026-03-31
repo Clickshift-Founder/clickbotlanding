@@ -2066,6 +2066,57 @@ footer {
 </section>
 
 
+<!-- ── TRADER VOLUME LEADERBOARD ─────────────────────────────── -->
+<section id="trader-leaderboard" style="padding:80px 48px;background:rgba(5,5,7,0.95);">
+<div style="max-width:760px;margin:0 auto;">
+
+  <div style="text-align:center;margin-bottom:48px;">
+    <div style="font-family:var(--font-mono);font-size:11px;color:rgba(0,200,100,0.6);
+        letter-spacing:0.1em;text-transform:uppercase;margin-bottom:12px;">
+      Trader Rankings · $SHIFT Points
+    </div>
+    <h2 style="font-family:var(--font-display);font-size:clamp(28px,4vw,44px);
+        font-weight:700;line-height:1.1;margin-bottom:12px;">
+      The <em style="font-style:italic;color:#00C864;">Top Traders</em>
+    </h2>
+    <p style="font-size:14px;color:rgba(255,255,255,0.4);max-width:440px;margin:0 auto;line-height:1.7;">
+      Trade more, earn $SHIFT. Early adopters get 3× multiplier — limited window before TGE.
+    </p>
+  </div>
+
+  <!-- Period tabs -->
+  <div style="display:flex;gap:6px;margin-bottom:16px;">
+    <button class="trader-tab lb-tab active" data-period="quarter"
+        onclick="loadTraderLeaderboard('quarter')">This Quarter</button>
+    <button class="trader-tab lb-tab" data-period="30d"
+        onclick="loadTraderLeaderboard('30d')">30 Days</button>
+    <button class="trader-tab lb-tab" data-period="7d"
+        onclick="loadTraderLeaderboard('7d')">7 Days</button>
+  </div>
+
+  <!-- Entries -->
+  <div id="trader-lb-entries"></div>
+
+  <!-- CTA -->
+  <div style="text-align:center;margin-top:32px;">
+    <a href="https://t.me/clicksolbot" target="_blank"
+       style="display:inline-flex;align-items:center;gap:8px;padding:14px 28px;
+              background:linear-gradient(135deg,#00C864,#00A851);
+              color:#000;font-weight:700;border-radius:10px;font-size:14px;
+              text-decoration:none;"
+       onmouseover="this.style.transform='scale(1.04)'"
+       onmouseout="this.style.transform='scale(1)'">
+      🏆 Join & Earn $SHIFT Tokens
+    </a>
+    <div style="margin-top:10px;font-size:12px;color:rgba(255,255,255,0.25);">
+      TGE: Q3 2026 · Early adopters get 3× multiplier
+    </div>
+  </div>
+
+</div>
+</section>
+
+
 <!-- ── SCREENS SHOWCASE ──────────────────────────────────────── -->
 <section id="screens">
   <div class="section-inner">
@@ -2907,6 +2958,71 @@ function setTrendFilter(f) {
 loadTrendingPicks();
 clearInterval(_trendTimer);
 _trendTimer = setInterval(loadTrendingPicks, 4 * 60 * 1000); // refresh every 4 min
+
+// ── Trader Rankings Leaderboard ─────────────────────────────────
+async function loadTraderLeaderboard(period = 'quarter') {
+    const container = document.getElementById('trader-lb-entries');
+    const statsGrid = document.getElementById('trader-lb-stats');
+    if (!container) return;
+
+    container.innerHTML = '<div style="text-align:center;padding:24px;color:rgba(255,255,255,0.2);">Loading...</div>';
+
+    try {
+        const res  = await fetch(`${STATS_API}/api/traders/leaderboard?period=${period}&limit=10`);
+        const data = await res.json();
+        const entries = data.entries || [];
+
+        // Update period tabs
+        document.querySelectorAll('.trader-tab').forEach(t => {
+            t.classList.toggle('active', t.dataset.period === period);
+        });
+
+        if (!entries.length) {
+            container.innerHTML = '<div style="text-align:center;padding:24px;color:rgba(255,255,255,0.2);">No trading activity yet — be first!</div>';
+            return;
+        }
+
+        const TIER = { diamond:'💎', platinum:'🏆', gold:'🥇', silver:'🥈', bronze:'🥉' };
+        const MEDALS = ['👑','🥈','🥉'];
+        const COLORS = ['#C9A84C','#C0C0C0','#CD7F32'];
+
+        container.innerHTML = entries.map((e, i) => {
+            const isTop   = e.rank <= 3;
+            const color   = isTop ? COLORS[e.rank-1] : '#22d3ee';
+            const label   = isTop ? MEDALS[e.rank-1] : '#' + e.rank;
+            const vol     = e.volume_sol >= 1000
+                ? (e.volume_sol/1000).toFixed(1) + 'K SOL'
+                : e.volume_sol.toFixed(3) + ' SOL';
+            const pts     = e.shift_points >= 1000
+                ? (e.shift_points/1000).toFixed(1) + 'K pts'
+                : Math.round(e.shift_points) + ' pts';
+            const tier    = TIER[e.tier] || '◎';
+            const early   = e.is_early_adopter ? ' ⚡3×' : '';
+
+            return `
+            <div style="display:flex;align-items:center;gap:12px;border-radius:10px;padding:12px 16px;
+                border:1px solid ${isTop ? color + '33' : 'rgba(255,255,255,0.06)'};
+                background:${isTop ? color + '0a' : 'rgba(255,255,255,0.02)'};margin-bottom:8px;">
+                <div style="width:36px;height:36px;border-radius:8px;display:flex;align-items:center;
+                    justify-content:center;font-weight:700;font-size:14px;flex-shrink:0;
+                    background:${color}18;color:${color}">${label}</div>
+                <div style="flex:1;min-width:0">
+                    <div style="font-size:14px;font-weight:600;color:#fff">${tier} ${e.display_name}${early}</div>
+                    <div style="font-size:11px;color:rgba(255,255,255,0.3);margin-top:2px">
+                        ${vol} · ${pts} · ${e.trade_count} trades
+                    </div>
+                </div>
+                <div style="font-weight:700;font-size:13px;font-family:var(--font-mono);color:${color}">${tier}</div>
+            </div>`;
+        }).join('');
+
+    } catch(err) {
+        container.innerHTML = '<div style="text-align:center;padding:24px;color:rgba(255,100,100,0.4);">Could not load rankings</div>';
+    }
+}
+
+// Load on page ready
+loadTraderLeaderboard('quarter');
 
 </script>
 
